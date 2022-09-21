@@ -46,10 +46,10 @@ class Reservation extends Resource
             ID::make()->sortable(),
             Text::make('First Name')->sortable()->rules('required'),
             Text::make('Last Name')->sortable()->rules('required'),
-            Number::make('Spot')->sortable()->rules('required'),
             BelongsTo::make('Attendee')->sortable()->rules('required'),
             BelongsTo::make('Event')->sortable()->rules('required'),
             BelongsTo::make('Room')->sortable()->rules('required'),
+            BelongsTo::make('Cot')->sortable()->rules('required'),
         ];
     }
 

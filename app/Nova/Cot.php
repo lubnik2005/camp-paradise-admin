@@ -3,26 +3,27 @@
 namespace App\Nova;
 
 use Illuminate\Http\Request;
+use Laravel\Nova\Fields\ID;
 use Laravel\Nova\Fields\Text;
-use Laravel\Nova\Fields\Select;
-use Laravel\Nova\Fields\DateTime;
+use Laravel\Nova\Fields\HasMany;
+use Laravel\Nova\Fields\BelongsTo;
 use Laravel\Nova\Http\Requests\NovaRequest;
 
-class Event extends Resource
+class Cot extends Resource
 {
     /**
      * The model the resource corresponds to.
      *
      * @var string
      */
-    public static $model = \App\Models\Event::class;
+    public static $model = \App\Models\Cot::class;
 
     /**
      * The single value that should be used to represent the resource when being displayed.
      *
      * @var string
      */
-    public static $title = 'name';
+    public static $title = 'id';
 
     /**
      * The columns that should be searched.
@@ -42,10 +43,10 @@ class Event extends Resource
     public function fields(NovaRequest $request)
     {
         return [
-            Text::make('Name')->sortable()->rules('required'),
-            Select::make('Status')->sortable()->rules('required')->options(['in_progress' => 'In progress', 'published' => 'Published']),
-            DateTime::make('Start On')->sortable()->rules('required'),
-            DateTime::make('End On')->sortable()->rules('required')
+            ID::make()->sortable(),
+            Text::make('Description')->sortable(),
+            HasMany::make('Reservations'),
+            BelongsTo::make('Room')
         ];
     }
 

@@ -5,6 +5,7 @@ namespace App\Nova;
 use Illuminate\Http\Request;
 use Laravel\Nova\Fields\Text;
 use Laravel\Nova\Fields\Select;
+use Laravel\Nova\Fields\HasMany;
 use Laravel\Nova\Fields\Number;
 use Laravel\Nova\Http\Requests\NovaRequest;
 
@@ -43,9 +44,14 @@ class Room extends Resource
     {
         return [
             Text::make('Name')->sortable()->rules('required'),
-            Select::make('Sex')->sortable()->options(['m' => 'Male', 'f' => 'Female', 'c' => 'Co-ed' ])->rules('required'),
-            Text::make('location')->sortable()->rules('required'),
-            Number::make('size')->rules('required')
+            Select::make('Sex')->sortable()->options([
+                'm' => 'Male',
+                'f' => 'Female',
+                'c' => 'Co-ed'
+            ])->rules('required')->displayUsingLabels(),
+            Text::make('Location')->sortable()->rules('required'),
+            Number::make('Size')->rules('required'),
+            HasMany::make('Cots')
         ];
     }
 

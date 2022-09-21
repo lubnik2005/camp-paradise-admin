@@ -23,7 +23,8 @@ return new class extends Migration
             $table->foreign('event_id')->references('id')->on('events');
             $table->unsignedBigInteger('room_id');
             $table->foreign('room_id')->references('id')->on('rooms');
-            $table->integer('spot');
+            $table->unsignedBigInteger('cot_id');
+            $table->foreign('cot_id')->references('id')->on('cots');
             $table->timestamps();
             $table->softDeletes();
         });
