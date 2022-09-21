@@ -38,10 +38,10 @@ return [
     'guards' => [
         'web' => [
             'driver' => 'session',
-            'provider' => 'attendees',
+            'provider' => 'users',
         ],
         'api' => [
-            'driver' => 'session',
+            'driver' => 'jwt',
             'provider' => 'attendees',
         ]
     ],

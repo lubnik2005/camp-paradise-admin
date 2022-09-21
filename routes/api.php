@@ -3,6 +3,8 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ApiController;
+use Illuminate\Support\Facades\Validator;
+
 
 /*
 |--------------------------------------------------------------------------
@@ -26,31 +28,15 @@ Route::group(['middleware' => ['jwt.verify']], function () {
         return \App\Models\Event::select('id', 'name')->where('status', '=', 'published')->get();
     });
 
-    Route::get('/rooms', function (Request $request) {
+    // Route::get('/rooms', function (Request $request) {
+    //     $event = \App\Models\Event::findOrFail($request->event_id);
+    //     return \App\Models\Room::where('event', $event)->toArray();
+    // });
+
+
+    Route::get('/cots', function (Request $request) {
         $event = \App\Models\Event::findOrFail($request->event_id);
         return \App\Models\Room::where('event', $event)->toArray();
-    });
-
-    Route::post('/reserve', function (Request $request) {
-        $attendee = \App\Models\Attendee::findOrFail($request->attendee_id);
-        $event = \App\Models\Event::findOrFail($request->event_id);
-        $room = \App\Models\Room::findOrFail($request->room_id);
-        $cot = \App\Models\Cot::findOrFail($request->cot_id);
-        // IMPORTANT! Have to secure this
-        // 1. Make sure cot is not reserved
-        // 2. Make sure that event is published
-        // 3. Make sure that room is for gender specific
-        // 4. Make sure cot is in room
-        // 5. Make sure room is in event
-        $reservation = new \App\Models\Reservation;
-        $reservation->attendee_id = $attendee->id;
-        $reservation->first_name = $attendee->first_name;
-        $reservation->last_name = $attendee->last_name;
-        $reservation->event_id = $event->id;
-        $reservation->room_id = $room->id;
-        $reservation->cot_id = $cot->id;
-        $response = $reservation->save();
-        return $response;
     });
 
     Route::get('/rooms', function (Request $request) {
@@ -73,7 +59,32 @@ Route::group(['middleware' => ['jwt.verify']], function () {
         });
         return $rooms_send;
     });
+
+    Route::get('/cots', function (Request $request) {
+        $data = $request->only('event_id');
+        $validator = Validator::make($data, [
+            'event_id' => 'required|integer',
+        ]);
+
+        //Send failed response if request is not valid
+        if ($validator->fails()) {
+            return response()->json(['error' => $validator->messages()], 200);
+        }
+
+        $attendee = auth('api')->user();
+        $event = \App\Models\Event::findOrFail($data['event_id']);
+        $cots = \App\Models\Cot::whereHas('room', function ($query) use ($attendee) {
+                $query->where('sex', '=', $attendee->sex);
+            })->get();
+        return response()->json($cots);
+    });
 });
 
-Route::post('login', [ApiController::class, 'authenticate']);
-Route::post('register', [ApiController::class, 'register']);
+Route::group(['middleware' => 'api'], function ($router) {
+    Route::post('reserve', [ApiController::class, 'reserve']);
+    Route::post('register', [ApiController::class, 'register']);
+    Route::post('login', [ApiController::class, 'login']);
+    Route::post('logout', [ApiController::class, 'logout']);
+    Route::post('refresh', [ApiController::class, 'logout']);
+    Route::post('me', [ApiController::class, 'me']);
+});

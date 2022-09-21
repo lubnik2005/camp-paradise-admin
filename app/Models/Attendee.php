@@ -14,6 +14,15 @@ class Attendee extends Authenticatable implements JWTSubject
 {
     use HasFactory;
 
+    protected $fillable = [
+        'first_name',
+        'last_name',
+        'church',
+        'email',
+        'sex',
+        'password',
+    ];
+
     public function getJWTIdentifier()
     {
         return $this->getKey();

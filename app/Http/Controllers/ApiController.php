@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use JWTAuth;
-use App\Models\User;
+use App\Models\Attendee;
 use Illuminate\Http\Request;
 use Tymon\JWTAuth\Exceptions\JWTException;
 use Symfony\Component\HttpFoundation\Response;
@@ -12,14 +12,29 @@ use App\Config;
 
 class ApiController extends Controller
 {
+
+    /**
+     * Create a new AuthController instance.
+     *
+     * @return void
+     */
+    public function __construct()
+    {
+        $this->middleware('auth:api', ['except' => ['login', 'register']]);
+    }
+
+
     public function register(Request $request)
     {
         //Validate data
-        $data = $request->only('name', 'email', 'password');
+        $data = $request->only('first_name', 'last_name', 'email', 'church', 'password', 'sex');
         $validator = Validator::make($data, [
-            'name' => 'required|string',
-            'email' => 'required|email|unique:users',
-            'password' => 'required|string|min:6|max:50'
+            'first_name' => 'required|string',
+            'last_name' => 'required|string',
+            'church' => 'required|string',
+            'email' => 'required|email|unique:attendees',
+            'password' => 'required|string|min:6|max:50',
+            'sex' => 'required|string|in:m,f'
         ]);
 
         //Send failed response if request is not valid
@@ -28,69 +43,94 @@ class ApiController extends Controller
         }
 
         //Request is valid, create new user
-        $user = User::create([
-            'name' => $request->name,
+        $attendee = Attendee::create([
+            'first_name' => $request->first_name,
+            'last_name' => $request->last_name,
+            'church' => $request->church,
             'email' => $request->email,
+            'sex' => $request->sex,
             'password' => bcrypt($request->password)
         ]);
 
         //User created, return success response
         return response()->json([
             'success' => true,
-            'message' => 'User created successfully',
-            'data' => $user
+            'message' => 'Account created successfully',
+            'data' => $attendee
         ], Response::HTTP_OK);
     }
 
-    public function authenticate(Request $request)
+    /**
+     * Get a JWT via given credentials.
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function login()
     {
-        $credentials = $request->only('email', 'password');
+        $credentials = request(['email', 'password']);
 
-        //valid credential
-        $validator = Validator::make($credentials, [
-            'email' => 'required|email',
-            'password' => 'required|string|min:6|max:50'
-        ]);
-
-        //Send failed response if request is not valid
-        if ($validator->fails()) {
-            return response()->json(['error' => $validator->messages()], 200);
+        if (!$token = auth('api')->attempt($credentials)) {
+            return response()->json(['error' => 'Unauthorized'], 401);
         }
 
-        //Request is validated
-        //Crean token
-        try {
-            config(['jwt.user' => Attendee::class]);
-            config(['auth.providers' => ['users' => [
-                'driver' => 'eloquent',
-                'model' => Attendee::class,
-            ]]]);
-            if (!$token = JWTAuth::attempt($credentials)) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Login credentials are invalid.',
-                ], 400);
-            }
-        } catch (JWTException $e) {
-            return $credentials;
-            return response()->json([
-                'success' => false,
-                'message' => 'Could not create token.',
-            ], 500);
-        }
+        return $this->respondWithToken($token);
+    }
 
-        //Token created, return with success response and jwt token
+    /**
+     * Get the authenticated User.
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function me()
+    {
+        return response()->json(auth('api')->user());
+    }
+
+    /**
+     * Log the user out (Invalidate the token).
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function logout()
+    {
+        auth('api')->logout();
+
+        return response()->json(['message' => 'Successfully logged out']);
+    }
+
+    /**
+     * Refresh a token.
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function refresh()
+    {
+        return $this->respondWithToken(auth('api')->refresh());
+    }
+
+    /**
+     * Get the token array structure.
+     *
+     * @param  string $token
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    protected function respondWithToken($token)
+    {
         return response()->json([
-            'success' => true,
-            'token' => $token,
+            'access_token' => $token,
+            'token_type' => 'bearer',
+            'expires_in' => auth('api')->factory()->getTTL() * 60
         ]);
     }
 
-    public function logout(Request $request)
+    public function reserve(Request $request)
     {
-        //valid credential
-        $validator = Validator::make($request->only('token'), [
-            'token' => 'required'
+        $data = $request->only('event_id', 'room_id', 'cot_id');
+        $validator = Validator::make($data, [
+            'event_id' => 'required|integer',
+            'room_id' => 'required|integer',
+            'cot_id' => 'required|integer'
         ]);
 
         //Send failed response if request is not valid
@@ -98,30 +138,34 @@ class ApiController extends Controller
             return response()->json(['error' => $validator->messages()], 200);
         }
 
-        //Request is validated, do logout        
-        try {
-            JWTAuth::invalidate($request->token);
 
-            return response()->json([
-                'success' => true,
-                'message' => 'User has been logged out'
-            ]);
-        } catch (JWTException $exception) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Sorry, user cannot be logged out'
-            ], Response::HTTP_INTERNAL_SERVER_ERROR);
+        $attendee = auth('api')->user();
+        $event = \App\Models\Event::findOrFail($data['event_id']);
+        $room = \App\Models\Room::findOrFail($data['room_id']);
+        $cot = \App\Models\Cot::findOrFail($data['cot_id']);
+
+        $reservation = \App\Models\Reservation::where('event_id', '=', $event->id)
+            ->where('room_id', '=', $room->id)
+            ->where('cot_id', '=', $cot->id);
+
+        if ($reservation->exists()) {
+            return response()->json(['error' => ['cot_id' => 'Reservation failed. Cot already taken.']], 200);
         }
-    }
 
-    public function get_user(Request $request)
-    {
-        $this->validate($request, [
-            'token' => 'required'
-        ]);
-
-        $user = JWTAuth::authenticate($request->token);
-
-        return response()->json(['user' => $user]);
+        // IMPORTANT! Have to secure this
+        // 1. Make sure cot is not reserved
+        // 2. Make sure that event is published
+        // 3. Make sure that room is for gender specific
+        // 4. Make sure cot is in room
+        // 5. Make sure room is in event
+        $reservation = new \App\Models\Reservation;
+        $reservation->attendee_id = $attendee->id;
+        $reservation->first_name = $attendee->first_name;
+        $reservation->last_name = $attendee->last_name;
+        $reservation->event_id = $event->id;
+        $reservation->room_id = $room->id;
+        $reservation->cot_id = $cot->id;
+        $response = $reservation->save();
+        return $response ? response()->json($reservation, 200) : response()->json(['error' => ['cot_id' => 'Reservation creation failed']]);
     }
 }
