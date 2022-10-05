@@ -2,13 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use JWTAuth;
 use App\Models\Attendee;
 use Illuminate\Http\Request;
-use Tymon\JWTAuth\Exceptions\JWTException;
 use Symfony\Component\HttpFoundation\Response;
 use Illuminate\Support\Facades\Validator;
-use App\Config;
 
 class ApiController extends Controller
 {
@@ -69,11 +66,14 @@ class ApiController extends Controller
     {
         $credentials = request(['email', 'password']);
 
-        if (!$token = auth('api')->attempt($credentials)) {
-            return response()->json(['error' => 'Unauthorized'], 401);
-        }
-
-        return $this->respondWithToken($token);
+        if (!$token = auth('api')->attempt($credentials)) return response()->json(['error' => 'Unauthorized'], 401);
+        $user = auth('api')->user();
+        $accessToken = [
+            'accessToken' => $token,
+            'tokenType' => 'bearer',
+            'expiresIn' => auth('api')->factory()->getTTL() * 60
+        ];
+        return response()->json(['accessToken' => $accessToken, 'user' => $user]);
     }
 
     /**
@@ -105,7 +105,14 @@ class ApiController extends Controller
      */
     public function refresh()
     {
-        return $this->respondWithToken(auth('api')->refresh());
+        $token = auth('api')->refresh();
+        $user = auth('api')->user();
+        $accessToken = [
+            'accessToken' => $token,
+            'tokenType' => 'bearer',
+            'expiresIn' => auth('api')->factory()->getTTL() * 60
+        ];
+        return response()->json(['accessToken' => $accessToken, 'user' => $user]);
     }
 
     /**
@@ -118,9 +125,9 @@ class ApiController extends Controller
     protected function respondWithToken($token)
     {
         return response()->json([
-            'access_token' => $token,
-            'token_type' => 'bearer',
-            'expires_in' => auth('api')->factory()->getTTL() * 60
+            'accessToken' => $token,
+            'tokenType' => 'bearer',
+            'expiresIn' => auth('api')->factory()->getTTL() * 60
         ]);
     }
 
@@ -167,5 +174,64 @@ class ApiController extends Controller
         $reservation->cot_id = $cot->id;
         $response = $reservation->save();
         return $response ? response()->json($reservation, 200) : response()->json(['error' => ['cot_id' => 'Reservation creation failed']]);
+    }
+
+    /**
+     * Get the authenticated User.
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function rooms(Request $request)
+    {
+        $attendee = auth('api')->user();
+        $data = $request->only('event_id');
+        $validator = Validator::make($data, [
+            'event_id' => 'required|integer',
+        ]);
+
+        //Send failed response if request is not valid
+        if ($validator->fails()) {
+            return response()->json(['error' => $validator->messages()], 200);
+        }
+
+        $event = \App\Models\Event::findOrFail($data['event_id']);
+        $rooms = $event->rooms()->whereIn('sex', [$attendee->sex, 'c'])->get();
+        return response()->json($rooms, 200);
+    }
+
+    /**
+     * Get the authenticated User.
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function cots(Request $request)
+    {
+        $attendee = auth('api')->user();
+        $data = $request->only('event_id', 'room_id');
+        $validator = Validator::make($data, [
+            'event_id' => 'required|integer',
+            'room_id' => 'required|integer',
+        ]);
+        if ($validator->fails()) return response()->json(['error' => $validator->messages()], 200);
+        $event = \App\Models\Event::findOrFail($data['event_id']);
+        $room = $event->rooms()->whereIn('sex', [$attendee->sex, 'c'])->findOrFail($data['room_id']);
+        $cots = \App\Models\Cot::where('cots.room_id', '=', $room->id)
+            ->leftJoin('reservations', 'cots.id', '=', 'reservations.cot_id')
+            ->select('cots.*', 'reservations.first_name', 'reservations.last_name')
+            ->get();
+        return response()->json($cots, 200);
+    }
+
+
+    /**
+     * Get the authenticated User.
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function reservations(Request $request)
+    {
+        $attendee = auth('api')->user();
+        $reservations = \App\Models\Reservation::where('attendee_id', '=', $attendee->id);
+        return response()->json($reservations, 200);
     }
 }

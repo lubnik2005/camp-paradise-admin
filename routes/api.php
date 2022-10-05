@@ -4,6 +4,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ApiController;
 use Illuminate\Support\Facades\Validator;
+use Carbon\Carbon;
 
 
 /*
@@ -25,21 +26,39 @@ Route::group(['middleware' => ['jwt.verify']], function () {
 
 
     Route::get('/events', function (Request $request) {
-        return \App\Models\Event::select('id', 'name')->where('status', '=', 'published')->get();
+        return \App\Models\Event::select('id', 'name', 'start_on', 'end_on')
+            ->where('status', '=', 'published')
+            ->orderBy('start_on', 'desc')
+            ->get();
     });
 
+    Route::get('/previous_events', function (Request $request) {
+        return \App\Models\Event::select('id', 'name', 'start_on', 'end_on')
+            ->where('end_on', '<', Carbon::now())
+            ->where('status', '=', 'published')
+            ->orderBy('start_on', 'desc')
+            ->get();
+    });
+
+    Route::get('/upcoming_events', function (Request $request) {
+        return \App\Models\Event::select('id', 'name', 'start_on', 'end_on')
+            ->where('end_on', '>=', Carbon::now())
+            ->where('status', '=', 'published')
+            ->orderBy('start_on', 'desc')
+            ->get();
+    });
     // Route::get('/rooms', function (Request $request) {
     //     $event = \App\Models\Event::findOrFail($request->event_id);
     //     return \App\Models\Room::where('event', $event)->toArray();
     // });
 
 
-    Route::get('/cots', function (Request $request) {
+    Route::get('/cots_temp', function (Request $request) {
         $event = \App\Models\Event::findOrFail($request->event_id);
         return \App\Models\Room::where('event', $event)->toArray();
     });
 
-    Route::get('/rooms', function (Request $request) {
+    Route::get('/rooms_temp', function (Request $request) {
         $attendee = \App\Models\Attendee::findOrFail($request->attendee_id);
         $event = \App\Models\Event::findOrFail($request->event_id);
         $reservations = \App\Models\Reservation::where('event_id', '=', $event->id);
@@ -60,11 +79,10 @@ Route::group(['middleware' => ['jwt.verify']], function () {
         return $rooms_send;
     });
 
-    Route::get('/cots', function (Request $request) {
+
+    Route::get('/cots_temp2', function (Request $request) {
         $data = $request->only('event_id');
-        $validator = Validator::make($data, [
-            'event_id' => 'required|integer',
-        ]);
+        $validator = Validator::make($data, ['event_id' => 'required|integer']);
 
         //Send failed response if request is not valid
         if ($validator->fails()) {
@@ -73,18 +91,23 @@ Route::group(['middleware' => ['jwt.verify']], function () {
 
         $attendee = auth('api')->user();
         $event = \App\Models\Event::findOrFail($data['event_id']);
-        $cots = \App\Models\Cot::whereHas('room', function ($query) use ($attendee) {
-                $query->where('sex', '=', $attendee->sex);
-            })->get();
+        $room_ids = $event->rooms()->get()->pluck('id');
+        $cots = \App\Models\Cot::whereHas('room', function ($query) use ($attendee, $room_ids) {
+            $query->where('sex', '=', $attendee->sex)
+                ->whereIn('id', $room_ids);
+        })->get();
         return response()->json($cots);
     });
 });
 
 Route::group(['middleware' => 'api'], function ($router) {
+    Route::get('rooms', [ApiController::class, 'rooms']);
+    Route::get('cots', [ApiController::class, 'cots']);
     Route::post('reserve', [ApiController::class, 'reserve']);
     Route::post('register', [ApiController::class, 'register']);
     Route::post('login', [ApiController::class, 'login']);
-    Route::post('logout', [ApiController::class, 'logout']);
-    Route::post('refresh', [ApiController::class, 'logout']);
-    Route::post('me', [ApiController::class, 'me']);
+    Route::get('refresh', [ApiController::class, 'refresh']);
+    Route::get('me', [ApiController::class, 'me']);
+    Route::get('reservations', [ApiController::class, 'reservations']);
+    Route::get('logout', [ApiController::class, 'logout']);
 });

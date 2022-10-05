@@ -23,7 +23,7 @@ class Attendee extends Resource
      *
      * @var string
      */
-    public static $title = 'id';
+    public static $title = 'email';
 
     /**
      * The columns that should be searched.
@@ -31,7 +31,7 @@ class Attendee extends Resource
      * @var array
      */
     public static $search = [
-        'id',
+        'email',
     ];
 
     /**
@@ -47,7 +47,7 @@ class Attendee extends Resource
             Text::make('First Name')->sortable()->rules('required'),
             Text::make('Last Name')->sortable()->rules('required'),
             Text::make('Church')->sortable()->rules('required'),
-            Select::make('Sex')->sortable()->options(['m' => 'Male', 'f'=>'Female'])->rules('required'),
+            Select::make('Sex')->sortable()->options(['m' => 'Male', 'f' => 'Female'])->rules('required'),
             Password::make('Password'),
         ];
     }

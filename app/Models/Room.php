@@ -13,4 +13,9 @@ class Room extends Model
     {
         return $this->hasMany(Cot::class);
     }
+
+    public function events()
+    {
+        return $this->belongsToMany(Event::class);
+    }
 }

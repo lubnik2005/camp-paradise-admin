@@ -3,9 +3,10 @@
 namespace App\Nova;
 
 use Illuminate\Http\Request;
-use Laravel\Nova\Fields\Text;
-use Laravel\Nova\Fields\Select;
+use Laravel\Nova\Fields\BelongsToMany;
 use Laravel\Nova\Fields\DateTime;
+use Laravel\Nova\Fields\Select;
+use Laravel\Nova\Fields\Text;
 use Laravel\Nova\Http\Requests\NovaRequest;
 
 class Event extends Resource
@@ -45,7 +46,8 @@ class Event extends Resource
             Text::make('Name')->sortable()->rules('required'),
             Select::make('Status')->sortable()->rules('required')->options(['in_progress' => 'In progress', 'published' => 'Published']),
             DateTime::make('Start On')->sortable()->rules('required'),
-            DateTime::make('End On')->sortable()->rules('required')
+            DateTime::make('End On')->sortable()->rules('required'),
+            BelongsToMany::make('Rooms')
         ];
     }
 

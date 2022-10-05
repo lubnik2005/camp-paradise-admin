@@ -2,11 +2,14 @@
 
 namespace App\Nova;
 
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Http\Request;
-use Laravel\Nova\Fields\Text;
-use Laravel\Nova\Fields\Select;
+use Laravel\Nova\Fields\BelongsToMany;
+use Laravel\Nova\Fields\ID;
 use Laravel\Nova\Fields\HasMany;
 use Laravel\Nova\Fields\Number;
+use Laravel\Nova\Fields\Select;
+use Laravel\Nova\Fields\Text;
 use Laravel\Nova\Http\Requests\NovaRequest;
 
 class Room extends Resource
@@ -31,7 +34,7 @@ class Room extends Resource
      * @var array
      */
     public static $search = [
-        'id',
+        'id', 'name'
     ];
 
     /**
@@ -43,15 +46,22 @@ class Room extends Resource
     public function fields(NovaRequest $request)
     {
         return [
+            ID::make()->sortable(),
             Text::make('Name')->sortable()->rules('required'),
             Select::make('Sex')->sortable()->options([
                 'm' => 'Male',
                 'f' => 'Female',
                 'c' => 'Co-ed'
             ])->rules('required')->displayUsingLabels(),
+            Select::make('Type')->options([
+                'dorm' => 'Dorm',
+                'vip' => 'VIP Room',
+                'cabin' => 'Cabin'
+            ])->required()->displayUsingLabels(),
             Text::make('Location')->sortable()->rules('required'),
             Number::make('Size')->rules('required'),
-            HasMany::make('Cots')
+            HasMany::make('Cots'),
+            BelongsToMany::make('Events')
         ];
     }
 
@@ -96,6 +106,6 @@ class Room extends Resource
      */
     public function actions(NovaRequest $request)
     {
-        return [];
+        return [(new Actions\AttachEvent)];
     }
 }
