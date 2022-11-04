@@ -8,11 +8,13 @@ use Illuminate\Contracts\Auth\Authenticatable as AuthenticatableContract;
 //use Illuminate\Auth\Authenticatable;
 use App\Models\User as Authenticatable;
 use Tymon\JWTAuth\Contracts\JWTSubject;
+use Laravel\Cashier\Billable;
 
 
 class Attendee extends Authenticatable implements JWTSubject
 {
     use HasFactory;
+    use Billable;
 
     protected $fillable = [
         'first_name',

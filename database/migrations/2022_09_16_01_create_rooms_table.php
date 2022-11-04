@@ -19,6 +19,7 @@ return new class extends Migration
             $table->string('sex')->nullable();
             $table->integer('size');
             $table->string('location');
+            $table->string('type');
             $table->timestamps();
             $table->softDeletes();
         });

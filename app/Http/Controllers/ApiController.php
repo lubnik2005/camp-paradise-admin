@@ -6,6 +6,7 @@ use App\Models\Attendee;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Illuminate\Support\Facades\Validator;
+use Carbon\Carbon;
 
 class ApiController extends Controller
 {
@@ -172,6 +173,8 @@ class ApiController extends Controller
         $reservation->event_id = $event->id;
         $reservation->room_id = $room->id;
         $reservation->cot_id = $cot->id;
+        // Stripe goes here
+
         $response = $reservation->save();
         return $response ? response()->json($reservation, 200) : response()->json(['error' => ['cot_id' => 'Reservation creation failed']]);
     }
@@ -233,5 +236,31 @@ class ApiController extends Controller
         $attendee = auth('api')->user();
         $reservations = \App\Models\Reservation::where('attendee_id', '=', $attendee->id);
         return response()->json($reservations, 200);
+    }
+
+    public function events(Request $request)
+    {
+        return \App\Models\Event::select('id', 'name', 'start_on', 'end_on')
+            ->where('status', '=', 'published')
+            ->orderBy('start_on', 'desc')
+            ->get();
+    }
+
+    public function previous_events(Request $request)
+    {
+        return \App\Models\Event::select('id', 'name', 'start_on', 'end_on')
+            ->where('end_on', '<', Carbon::now())
+            ->where('status', '=', 'published')
+            ->orderBy('start_on', 'desc')
+            ->get();
+    }
+
+    public function upcoming_events(Request $request)
+    {
+        return \App\Models\Event::select('id', 'name', 'start_on', 'end_on')
+            ->where('end_on', '>=', Carbon::now())
+            ->where('status', '=', 'published')
+            ->orderBy('start_on', 'desc')
+            ->get();
     }
 }

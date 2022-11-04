@@ -3,9 +3,8 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ApiController;
+use App\Http\Controllers\StripeController;
 use Illuminate\Support\Facades\Validator;
-use Carbon\Carbon;
-
 
 /*
 |--------------------------------------------------------------------------
@@ -23,35 +22,6 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 });
 
 Route::group(['middleware' => ['jwt.verify']], function () {
-
-
-    Route::get('/events', function (Request $request) {
-        return \App\Models\Event::select('id', 'name', 'start_on', 'end_on')
-            ->where('status', '=', 'published')
-            ->orderBy('start_on', 'desc')
-            ->get();
-    });
-
-    Route::get('/previous_events', function (Request $request) {
-        return \App\Models\Event::select('id', 'name', 'start_on', 'end_on')
-            ->where('end_on', '<', Carbon::now())
-            ->where('status', '=', 'published')
-            ->orderBy('start_on', 'desc')
-            ->get();
-    });
-
-    Route::get('/upcoming_events', function (Request $request) {
-        return \App\Models\Event::select('id', 'name', 'start_on', 'end_on')
-            ->where('end_on', '>=', Carbon::now())
-            ->where('status', '=', 'published')
-            ->orderBy('start_on', 'desc')
-            ->get();
-    });
-    // Route::get('/rooms', function (Request $request) {
-    //     $event = \App\Models\Event::findOrFail($request->event_id);
-    //     return \App\Models\Room::where('event', $event)->toArray();
-    // });
-
 
     Route::get('/cots_temp', function (Request $request) {
         $event = \App\Models\Event::findOrFail($request->event_id);
@@ -101,6 +71,11 @@ Route::group(['middleware' => ['jwt.verify']], function () {
 });
 
 Route::group(['middleware' => 'api'], function ($router) {
+    Route::post('create-payment-intent', [StripeController::class, 'createPaymentIntent']);
+    Route::get('config', [StripeController::class, 'config']);
+    Route::get('upcoming_events', [ApiController::class, 'upcoming_events']);
+    Route::get('previous_events', [ApiController::class, 'previous_events']);
+    Route::get('events', [ApiController::class, 'events']);
     Route::get('rooms', [ApiController::class, 'rooms']);
     Route::get('cots', [ApiController::class, 'cots']);
     Route::post('reserve', [ApiController::class, 'reserve']);
@@ -111,3 +86,5 @@ Route::group(['middleware' => 'api'], function ($router) {
     Route::get('reservations', [ApiController::class, 'reservations']);
     Route::get('logout', [ApiController::class, 'logout']);
 });
+
+Route::post('/stripe-webhook', [StripeController::class, 'stripeWebhook']);

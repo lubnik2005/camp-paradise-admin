@@ -5,6 +5,7 @@ namespace App\Nova;
 use Illuminate\Http\Request;
 use Laravel\Nova\Fields\ID;
 use Laravel\Nova\Fields\Text;
+use Laravel\Nova\Fields\Url;
 use Laravel\Nova\Fields\Number;
 use Laravel\Nova\Fields\BelongsTo;
 use Laravel\Nova\Http\Requests\NovaRequest;
@@ -46,7 +47,10 @@ class Reservation extends Resource
             ID::make()->sortable(),
             Text::make('First Name')->sortable()->rules('required'),
             Text::make('Last Name')->sortable()->rules('required'),
-            BelongsTo::make('Attendee')->sortable()->rules('required'),
+            Url::make('Stripe', function () {
+                return env('STRIPE_DASHBOARD_URL', 'https://dashboard.stripe.com/payments/') . $this->stripe_payment_intent;
+            })->sortable(),
+            BelongsTo::make('Attendee Account', 'attendee', Attendee::class)->sortable()->rules('required'),
             BelongsTo::make('Event')->sortable()->rules('required'),
             BelongsTo::make('Room')->sortable()->rules('required'),
             BelongsTo::make('Cot')->sortable()->rules('required'),
