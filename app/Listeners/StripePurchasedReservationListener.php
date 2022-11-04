@@ -34,7 +34,7 @@ class StripePurchasedReservationListener
 
                 break;
             case 'charge.succeeded':
-            case 'payment_intent.succeeded':
+                //case 'payment_intent.succeeded':
                 Log::debug('charge.succeeded');
                 $object = $event->payload['data']['object'];
                 $data = $object['metadata'];
