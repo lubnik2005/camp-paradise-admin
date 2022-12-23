@@ -11,8 +11,33 @@ class Event extends Model
 
     protected $casts = ['start_on' => 'datetime', 'end_on' => 'datetime'];
 
+    public function reservations()
+    {
+        return $this->hasMany(Reservation::class);
+    }
+
     public function rooms()
     {
         return $this->belongsToMany(Room::class);
+    }
+
+    public function reserved_rooms()
+    {
+        return $this->rooms()->where('rooms.id', 1);
+    }
+
+    public function cabins()
+    {
+        return $this->rooms()->where('type', 'cabin');
+    }
+
+    public function dorms()
+    {
+        return $this->rooms()->where('type', 'dorm');
+    }
+
+    public function vips()
+    {
+        return $this->rooms()->where('type', 'vip');
     }
 }

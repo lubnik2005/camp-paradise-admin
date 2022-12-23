@@ -16,6 +16,16 @@ class Attendee extends Authenticatable implements JWTSubject
     use HasFactory;
     use Billable;
 
+    public static function boot()
+    {
+        parent::boot();
+        static::created(function ($user) {
+            $user->createAsStripeCustomer([
+                'email' => $user->email
+            ]);
+        });
+    }
+
     protected $fillable = [
         'first_name',
         'last_name',

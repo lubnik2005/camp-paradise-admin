@@ -367,14 +367,7 @@ class RoomSeeder extends Seeder
             ],
             // End Men's Dorm
             // Start Women's Dorm
-            [
-                'id' => 44,
-                'name' => 'Men\'s Dorm 318',
-                'sex' => 'm',
-                'size' => 0,
-                'location' => 'Men\'s Dorm 318',
-                'type' => 'dorm'
-            ],
+
         ]);
     }
 }

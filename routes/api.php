@@ -77,6 +77,8 @@ Route::group(['middleware' => 'api'], function ($router) {
     Route::get('previous_events', [ApiController::class, 'previous_events']);
     Route::get('events', [ApiController::class, 'events']);
     Route::get('rooms', [ApiController::class, 'rooms']);
+    Route::get('capacity', [ApiController::class, 'capacity']);
+    Route::get('dorm_rooms', [ApiController::class, 'dorm_rooms']);
     Route::get('cots', [ApiController::class, 'cots']);
     Route::post('reserve', [ApiController::class, 'reserve']);
     Route::post('register', [ApiController::class, 'register']);

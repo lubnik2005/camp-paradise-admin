@@ -44,7 +44,10 @@ class Event extends Resource
     {
         return [
             Text::make('Name')->sortable()->rules('required'),
-            Select::make('Status')->sortable()->rules('required')->options(['in_progress' => 'In progress', 'published' => 'Published']),
+            Select::make('Status')->sortable()
+                ->rules('required')
+                ->options(['in_progress' => 'In progress', 'published' => 'Published'])
+                ->displayUsingLabels(),
             DateTime::make('Start On')->sortable()->rules('required'),
             DateTime::make('End On')->sortable()->rules('required'),
             BelongsToMany::make('Rooms')

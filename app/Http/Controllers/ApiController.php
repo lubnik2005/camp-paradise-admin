@@ -25,29 +25,28 @@ class ApiController extends Controller
     public function register(Request $request)
     {
         //Validate data
-        $data = $request->only('first_name', 'last_name', 'email', 'church', 'password', 'sex');
+        $data = $request->only('first_name', 'last_name', 'email', 'password', 'gender');
         $validator = Validator::make($data, [
             'first_name' => 'required|string',
             'last_name' => 'required|string',
-            'church' => 'required|string',
-            'email' => 'required|email|unique:attendees',
+            'email' => 'required|email|unique:attendees|unique:attendees',
             'password' => 'required|string|min:6|max:50',
-            'sex' => 'required|string|in:m,f'
+            'gender' => 'required|string|in:m,f',
         ]);
 
         //Send failed response if request is not valid
         if ($validator->fails()) {
-            return response()->json(['error' => $validator->messages()], 200);
+            return response()->json(['error' => $validator->messages()], 403);
         }
 
         //Request is valid, create new user
         $attendee = Attendee::create([
             'first_name' => $request->first_name,
             'last_name' => $request->last_name,
-            'church' => $request->church,
+            'church' => '',
             'email' => $request->email,
-            'sex' => $request->sex,
-            'password' => bcrypt($request->password)
+            'sex' => $request->gender,
+            'password' => bcrypt($request->password),
         ]);
 
         //User created, return success response
@@ -207,6 +206,31 @@ class ApiController extends Controller
      *
      * @return \Illuminate\Http\JsonResponse
      */
+    public function dorm_rooms(Request $request)
+    {
+        $attendee = auth('api')->user();
+        $data = $request->only('event_id');
+        $validator = Validator::make($data, [
+            'event_id' => 'required|integer',
+        ]);
+
+        //Send failed response if request is not valid
+        if ($validator->fails()) {
+            return response()->json(['error' => $validator->messages()], 200);
+        }
+
+        $event = \App\Models\Event::findOrFail($data['event_id']);
+        $rooms = $event->rooms()->whereIn('sex', [$attendee->sex, 'c'])->get();
+        return response()->json($rooms, 200);
+    }
+
+
+
+    /**
+     * Get the authenticated User.
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function cots(Request $request)
     {
         $attendee = auth('api')->user();
@@ -262,5 +286,18 @@ class ApiController extends Controller
             ->where('status', '=', 'published')
             ->orderBy('start_on', 'desc')
             ->get();
+    }
+
+    public function capacity(Request $request)
+    {
+        $data = $request->only('event_id');
+        $event = \App\Models\Event::find($data['event_id']);
+        return [
+            'capacity' => $event->rooms()->count(),
+            'reserved' => $event->reservations()->count(),
+            'cabins' => $event->cabins()->count(),
+            'dorms' => $event->dorms()->count(),
+            'vips' => $event->vips()->count(),
+        ];
     }
 }
