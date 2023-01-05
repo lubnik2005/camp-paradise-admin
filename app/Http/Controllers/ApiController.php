@@ -7,6 +7,16 @@ use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Illuminate\Support\Facades\Validator;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\VerifyEmail;
+use Lcobucci\JWT\Encoding\CannotDecodeContent;
+use Lcobucci\JWT\Encoding\JoseEncoder;
+use Lcobucci\JWT\Token\InvalidTokenStructure;
+use Lcobucci\JWT\Token\Parser;
+use Lcobucci\JWT\Token\UnsupportedHeaderFound;
+use Lcobucci\JWT\UnencryptedToken;
+use Illuminate\Support\Facades\Log;
+use Carbon\CarbonImmutable;
 
 class ApiController extends Controller
 {
@@ -18,9 +28,8 @@ class ApiController extends Controller
      */
     public function __construct()
     {
-        $this->middleware('auth:api', ['except' => ['login', 'register']]);
+        $this->middleware('auth:api', ['except' => ['login', 'register', 'verify', 'resend']]);
     }
-
 
     public function register(Request $request)
     {
@@ -49,12 +58,63 @@ class ApiController extends Controller
             'password' => bcrypt($request->password),
         ]);
 
+        Mail::mailer('ses')
+            ->to($attendee)
+            ->send(new VerifyEmail($attendee));
+
         //User created, return success response
         return response()->json([
             'success' => true,
             'message' => 'Account created successfully',
             'data' => $attendee
         ], Response::HTTP_OK);
+    }
+
+    public function resend(Request $request)
+    {
+        $data = $request->only('email');
+        $validator = Validator::make($data, [
+            'email' => 'required|email',
+        ]);
+        $attendee = Attendee::where('email', $data['email'])->firstOrFail();
+        if ($attendee->email_verified_at) {
+            return response()->json(['error' => ['validated' => ['Email already validated.']]], 403);
+        }
+        Mail::mailer('ses')
+            ->to($attendee)
+            ->send(new VerifyEmail($attendee));
+        return response()->json(['success' => ['Sent validation email']], 200);
+    }
+
+    public function verify(Request $request)
+    {
+
+        $parser = new Parser(new JoseEncoder());
+
+        try {
+            $token = $parser->parse($request->only(['token'])['token']);
+        } catch (CannotDecodeContent | InvalidTokenStructure | UnsupportedHeaderFound $e) {
+            echo 'Oh no, an error: ' . $e->getMessage();
+        }
+        assert($token instanceof UnencryptedToken);
+
+        $now = CarbonImmutable::now();
+        $exp = $token->claims()->get('exp');
+        Log::debug('TIME');
+        Log::debug($exp->format('Y-m-d H:i:s'));
+        Log::debug($now->format('Y-m-d H:i:s'));
+        if ($now >= $exp) {
+            return response()->json(['error' => ['token_expired' => ['Email validation expired. Please send another.']]], 403);
+        }
+        $email = $token->claims()->get('email');
+        $attendee = \App\Models\Attendee::where('email', '=', $email)->firstOrFail();
+        if ($attendee->email_verified_at) return response()->json(['success' => ['Verified']]);
+        $attendee->email_verified_at = Carbon::now();
+        $attendee->save();
+        $attendee->createAsStripeCustomer();
+
+        //JWTAuth::invalidate(new \Tymon\JWTAuth\Token($token->token));
+        //return response()->json(['error' => 'temp', '403']);
     }
 
     /**
@@ -66,14 +126,33 @@ class ApiController extends Controller
     {
         $credentials = request(['email', 'password']);
 
-        if (!$token = auth('api')->attempt($credentials)) return response()->json(['error' => 'Unauthorized'], 401);
+        if (!$token = auth('api')->attempt($credentials)) return response()->json(['message' => 'Email/Password combination not found.'], 400); //->json(['error' => ['error' => ['Credentials not found.']]], 401);
         $user = auth('api')->user();
+        if (!$user->email_verified_at) return response()->json(['message' => 'Email not verified.'], 400); //, ->json(['error' => ['error' => ['Email not verified.']]], 402);
         $accessToken = [
             'accessToken' => $token,
             'tokenType' => 'bearer',
             'expiresIn' => auth('api')->factory()->getTTL() * 60
         ];
-        return response()->json(['accessToken' => $accessToken, 'user' => $user]);
+        // "user": {
+        //     "id": "8864c717-587d-472a-929a-8e5f298024da-0",
+        //     "displayName": "Jaydon Frankie",
+        //     "email": "demo@minimals.cc",
+        //     "password": "demo1234",
+        //     "photoURL": "https://api-dev-minimal-v4.vercel.app/assets/images/avatars/avatar_default.jpg",
+        //     "phoneNumber": "+40 777666555",
+        //     "country": "United States",
+        //     "address": "90210 Broadway Blvd",
+        //     "state": "California",
+        //     "city": "San Francisco",
+        //     "zipCode": "94116",
+        //     "about": "Praesent turpis. Phasellus viverra nulla ut metus varius laoreet. Phasellus tempus.",
+        //     "role": "admin",
+        //     "isPublic": true
+        // }
+        $user->displayName = $user->first_name . ' ' . $user->last_name;
+        $user->photoURL = 'https://api-dev-minimal-v4.vercel.app/assets/images/avatars/avatar_default.jpg';
+        return response()->json(['accessTokenFull' => $accessToken, 'accessToken' => $token, 'user' => $user]);
     }
 
     /**
@@ -197,7 +276,7 @@ class ApiController extends Controller
         }
 
         $event = \App\Models\Event::findOrFail($data['event_id']);
-        $rooms = $event->rooms()->whereIn('sex', [$attendee->sex, 'c'])->get();
+        $rooms = $event->rooms()->whereIn('sex', [$attendee->sex, 'c'])->withCount('cots')->withCount('reservations')->get();
         return response()->json($rooms, 200);
     }
 
@@ -292,8 +371,9 @@ class ApiController extends Controller
     {
         $data = $request->only('event_id');
         $event = \App\Models\Event::find($data['event_id']);
+        $rooms = $event->rooms()->withCount('cots')->get()->toArray();
         return [
-            'capacity' => $event->rooms()->count(),
+            'capacity' => array_sum(array_column($rooms, 'cots_count')),
             'reserved' => $event->reservations()->count(),
             'cabins' => $event->cabins()->count(),
             'dorms' => $event->dorms()->count(),

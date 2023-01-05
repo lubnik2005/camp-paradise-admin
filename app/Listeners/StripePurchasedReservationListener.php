@@ -7,6 +7,9 @@ use Illuminate\Queue\InteractsWithQueue;
 use Laravel\Cashier\Events\WebhookReceived;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\ReservedCot;
+
 
 class StripePurchasedReservationListener
 {
@@ -85,11 +88,15 @@ class StripePurchasedReservationListener
                 $reservation->cot_id = $cot->id;
                 Log::debug('Reservation 0');
                 $reservation->stripe_payment_intent = $object['payment_intent'];
+                $reservation->save();
                 // Stripe goes here
 
-                $response = $reservation->save();
+                Mail::mailer('ses')
+                    ->to($attendee)
+                    ->send(new ReservedCot($attendee, $camp_event, $room, $cot, $reservation));
                 Log::debug('Reservation');
                 Log::debug($reservation);
+
                 // ... handle other event types
                 break;
             default:

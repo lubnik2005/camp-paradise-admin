@@ -89,4 +89,23 @@ Route::group(['middleware' => 'api'], function ($router) {
     Route::get('logout', [ApiController::class, 'logout']);
 });
 
+Route::get('/verify', [ApiController::class, 'verify']);
+Route::get('/resend', [ApiController::class, 'resend']);
+
 Route::post('/stripe-webhook', [StripeController::class, 'stripeWebhook']);
+
+Route::get('/mailable', function () {
+    //return view('emails.reserved', ['name' => 'James']);
+    $attendee = \App\Models\Attendee::findOrFail(1);
+    $camp_event = \App\Models\Event::findOrFail(1);
+    $room = \App\Models\Room::findOrFail(4);
+    $cot = \App\Models\Cot::findOrFail(4);
+    $reservation = \App\Models\Reservation::findOrFail(2);
+
+    return new \App\Mail\ReservedCot($attendee, $camp_event, $room, $cot, $reservation);
+});
+
+Route::get('/verify-email', function () {
+    $attendee = \App\Models\Attendee::findOrFail(1);
+    return new \App\Mail\VerifyEmail($attendee);
+});

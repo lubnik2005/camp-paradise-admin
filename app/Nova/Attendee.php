@@ -5,7 +5,9 @@ namespace App\Nova;
 use Illuminate\Http\Request;
 use Laravel\Nova\Fields\Text;
 use Laravel\Nova\Fields\Select;
+use Laravel\Nova\Fields\DateTime;
 use Laravel\Nova\Fields\Password;
+use Laravel\Nova\Fields\Url;
 use Laravel\Nova\Fields\PasswordConfirmation;
 use Laravel\Nova\Http\Requests\NovaRequest;
 
@@ -46,9 +48,13 @@ class Attendee extends Resource
             Text::make('Email')->sortable()->rules('required'),
             Text::make('First Name')->sortable()->rules('required'),
             Text::make('Last Name')->sortable()->rules('required'),
+            Url::make('Stripe', fn () => $this->stripe_id ? env('STRIPE_DASHBOARD_URL', 'https://dashboard.stripe.com/') . 'customers/' . $this->stripe_id : '')
+                ->displayUsing(fn () => $this->stripe_id ? env('STRIPE_DASHBOARD_URL', 'https://dashboard.stripe.com/') . 'customers/' . $this->stripe_id : '')
+                ->sortable(),
+            DateTime::make('Email Verified At')->sortable(),
             Text::make('Church')->sortable()->rules('required'),
             Select::make('Sex')->sortable()->options(['m' => 'Male', 'f' => 'Female'])->rules('required'),
-            Password::make('Password'),
+            Password::make('Password')->onlyOnForms(),
         ];
     }
 

@@ -56,7 +56,9 @@ class Room extends Resource
             Select::make('Type')->options([
                 'dorm' => 'Dorm',
                 'vip' => 'VIP Room',
-                'cabin' => 'Cabin'
+                'cabin' => 'Cabin',
+                'rv' => 'RV Spot',
+                'tent' => 'Tent Spot',
             ])->required()->displayUsingLabels(),
             Text::make('Location')->sortable()->rules('required'),
             Number::make('Size')->rules('required'),
