@@ -34,10 +34,10 @@ class ApiController extends Controller
     public function register(Request $request)
     {
         //Validate data
-        $data = $request->only('first_name', 'last_name', 'email', 'password', 'gender');
+        $data = $request->only('firstName', 'lastName', 'email', 'password', 'gender');
         $validator = Validator::make($data, [
-            'first_name' => 'required|string',
-            'last_name' => 'required|string',
+            'firstName' => 'required|string',
+            'lastName' => 'required|string',
             'email' => 'required|email|unique:attendees|unique:attendees',
             'password' => 'required|string|min:6|max:50',
             'gender' => 'required|string|in:m,f',
@@ -45,13 +45,13 @@ class ApiController extends Controller
 
         //Send failed response if request is not valid
         if ($validator->fails()) {
-            return response()->json(['error' => $validator->messages()], 403);
+            return response()->json(['message' => $validator->errors()->first()], 403);
         }
 
         //Request is valid, create new user
         $attendee = Attendee::create([
-            'first_name' => $request->first_name,
-            'last_name' => $request->last_name,
+            'first_name' => $request->firstName,
+            'last_name' => $request->lastName,
             'church' => '',
             'email' => $request->email,
             'sex' => $request->gender,
