@@ -17,17 +17,17 @@ databases:
     - homestead
 features:
     -
-        mysql: true
+        mysql: false
     -
         mariadb: false
     -
-        postgresql: false
+        postgresql: true
     -
         ohmyzsh: false
     -
         webdriver: false
 services:
     -
-        enabled: [mysql]
+        enabled: [postgresql]
 name: camp-paradise-admin
 hostname: camp-paradise-admin
