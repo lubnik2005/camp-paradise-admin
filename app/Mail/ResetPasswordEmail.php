@@ -18,7 +18,7 @@ use Lcobucci\JWT\Token\Builder;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\Log;
 
-class VerifyEmail extends Mailable
+class ResetPasswordEmail extends Mailable
 {
     use Queueable, SerializesModels;
 
@@ -56,7 +56,7 @@ class VerifyEmail extends Mailable
         $signingKey   = InMemory::plainText(config('jwt.secret'));
         $iat = CarbonImmutable::now();
         $nbf = CarbonImmutable::now();
-        $exp = CarbonImmutable::now()->add(1, 'day');
+        $exp = CarbonImmutable::now()->add(30, 'minutes');
         $token = $tokenBuilder
             // Configures the issuer (iss claim)
             ->issuedBy(config('app.url'))
@@ -82,12 +82,7 @@ class VerifyEmail extends Mailable
 
         $clientUrl = env('CLIENT_URL', 'http://localhost:3000');
 
-        $this->url = "$clientUrl/auth/verify?token=$tokenString";
-        Log::debug('TOKEN');
-        Log::debug($tokenString);
-        Log::debug($clientUrl);
-        Log::debug($this->url);
-        Log::debug("$clientUrl/auth/verify?token=$tokenString");
+        $this->url = "$clientUrl/auth/new-password?token=$tokenString";
         $this->attendee = $attendee;
     }
 
@@ -100,7 +95,7 @@ class VerifyEmail extends Mailable
     {
         return new Envelope(
             from: new Address(config('mail.from.address'), config('mail.from.name')),
-            subject: 'Camp Paradise Verify E-mail',
+            subject: 'Camp Paradise Reset Password',
         );
     }
 
@@ -112,7 +107,7 @@ class VerifyEmail extends Mailable
     public function content()
     {
         return new Content(
-            view: 'emails.verify-email',
+            view: 'emails.reset-password',
             //text: 'emails.orders.reserved-text'
         );
     }
