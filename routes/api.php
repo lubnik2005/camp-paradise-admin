@@ -91,6 +91,8 @@ Route::group(['middleware' => 'api'], function ($router) {
 
 Route::get('/verify', [ApiController::class, 'verify']);
 Route::get('/resend', [ApiController::class, 'resend']);
+Route::get('/reset-password', [ApiController::class, 'resetPassword']);
+Route::post('/new-password', [ApiController::class, 'newPassword']);
 
 Route::post('/stripe-webhook', [StripeController::class, 'stripeWebhook']);
 

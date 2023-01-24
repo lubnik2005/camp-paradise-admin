@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Validator;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\VerifyEmail;
+use App\Mail\ResetPasswordEmail;
 use Lcobucci\JWT\Encoding\CannotDecodeContent;
 use Lcobucci\JWT\Encoding\JoseEncoder;
 use Lcobucci\JWT\Token\InvalidTokenStructure;
@@ -28,7 +29,7 @@ class ApiController extends Controller
      */
     public function __construct()
     {
-        $this->middleware('auth:api', ['except' => ['login', 'register', 'verify', 'resend']]);
+        $this->middleware('auth:api', ['except' => ['login', 'register', 'verify', 'resend', 'resetPassword', 'newPassword']]);
     }
 
     public function register(Request $request)
@@ -111,10 +112,59 @@ class ApiController extends Controller
         if ($attendee->email_verified_at) return response()->json(['success' => ['Verified']]);
         $attendee->email_verified_at = Carbon::now();
         $attendee->save();
-        $attendee->createAsStripeCustomer();
+        $attendee->createOrGetStripeCustomer();
 
         //JWTAuth::invalidate(new \Tymon\JWTAuth\Token($token->token));
         //return response()->json(['error' => 'temp', '403']);
+    }
+
+    /**
+     * Send password change link to email
+     */
+    public function resetPassword(Request $request)
+    {
+        $data = $request->only('email');
+        $validator = Validator::make($data, [
+            'email' => 'required|email',
+        ]);
+        $attendee = Attendee::where('email', $data['email'])->firstOrFail();
+
+        Mail::mailer('ses')
+            ->to($attendee)
+            ->send(new ResetPasswordEmail($attendee));
+        return response()->json(['success' => ['Password reset e-mail sent.']], 200);
+    }
+
+    public function newPassword(Request $request)
+    {
+        $data = $request->only('email', 'password', 'confirmPassword', 'token');
+        $parser = new Parser(new JoseEncoder());
+
+        try {
+            $token = $parser->parse($data['token']);
+        } catch (CannotDecodeContent | InvalidTokenStructure | UnsupportedHeaderFound $e) {
+            echo 'Oh no, an error: ' . $e->getMessage();
+        }
+        assert($token instanceof UnencryptedToken);
+
+        $now = CarbonImmutable::now();
+        $exp = $token->claims()->get('exp');
+        Log::debug('TIME');
+        Log::debug($exp->format('Y-m-d H:i:s'));
+        Log::debug($now->format('Y-m-d H:i:s'));
+        if ($now >= $exp) {
+            return response()->json(['error' => ['token_expired' => ['Email validation expired. Please send another.']]], 403);
+        }
+        $tokenEmail = $token->claims()->get('email');
+        $email = $data['email'];
+        $password = $data['password'];
+        if ($email != $tokenEmail) {
+            return response()->json(['message' => 'Wrong email for token.', 403]);
+        }
+        $attendee = \App\Models\Attendee::where('email', '=', $email)->firstOrFail();
+        $attendee->password = bcrypt($password);
+        $attendee->save();
+        return response()->json(['message' => 'Reset Password.', 200]);
     }
 
     /**
