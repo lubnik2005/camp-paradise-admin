@@ -82,12 +82,12 @@ class VerifyEmail extends Mailable
 
         $clientUrl = env('CLIENT_URL', 'http://localhost:3000');
 
-        $this->url = "$clientUrl/verify?token=$tokenString";
+        $this->url = "$clientUrl/auth/verify?token=$tokenString";
         Log::debug('TOKEN');
         Log::debug($tokenString);
         Log::debug($clientUrl);
         Log::debug($this->url);
-        Log::debug("$clientUrl/verify?token=$tokenString");
+        Log::debug("$clientUrl/auth/verify?token=$tokenString");
         $this->attendee = $attendee;
     }
 
