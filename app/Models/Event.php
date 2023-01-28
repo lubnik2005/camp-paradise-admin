@@ -18,7 +18,7 @@ class Event extends Model
 
     public function rooms()
     {
-        return $this->belongsToMany(Room::class);
+        return $this->belongsToMany(Room::class)->withPivot('price');;
     }
 
     public function reserved_rooms()

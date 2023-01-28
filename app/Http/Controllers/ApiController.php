@@ -32,6 +32,36 @@ class ApiController extends Controller
         $this->middleware('auth:api', ['except' => ['login', 'register', 'verify', 'resend', 'resetPassword', 'newPassword']]);
     }
 
+    public function forms(Request $request)
+    {
+        $forms = \App\Models\Form::all()->toArray();
+        $forms = array_map(function ($form) {
+            $form['status'] = 'completed';
+            return $form;
+        }, $forms);
+        return response()->json($forms, 200);
+    }
+
+    // Right before stripe is sent, confirm that the reservation is still available
+    public function verifyReservation(Request $request)
+    {
+
+        //return response()->json([], 200);
+        return response()->json(['message' => 'Reservation/Cot is no longer available.'], 500);
+    }
+
+    public function changePassword(Request $request)
+    {
+        $passwords = request(['oldPassword', 'newPassword']);
+        $user = auth('api')->user();
+        $credentials = ['email' => $user->email, 'password' => $passwords['oldPassword']];
+        if (!$token = auth('api')->attempt($credentials)) return response()->json(['message' => 'Password is wrong.'], 400); //->json(['error' => ['error' => ['Credentials not found.']]], 401);
+        $attendee = \App\Models\Attendee::where('email', '=', $user->email)->firstOrFail();
+        $attendee->password = bcrypt($passwords['newPassword']);
+        $attendee->save();
+        return response()->json(['message' => 'Reset Password.', 200]);
+    }
+
     public function register(Request $request)
     {
         //Validate data
@@ -262,11 +292,12 @@ class ApiController extends Controller
 
     public function reserve(Request $request)
     {
-        $data = $request->only('event_id', 'room_id', 'cot_id');
+        $data = $request->only('user_id', 'cart');
         $validator = Validator::make($data, [
-            'event_id' => 'required|integer',
-            'room_id' => 'required|integer',
-            'cot_id' => 'required|integer'
+            'cart' => 'required|array|size:1',
+            'cart.*.event_id' => 'required|integer',
+            'cart.*.room_id' => 'required|integer',
+            'cart.*.cot_id' => 'required|integer'
         ]);
 
         //Send failed response if request is not valid
@@ -371,10 +402,18 @@ class ApiController extends Controller
         if ($validator->fails()) return response()->json(['error' => $validator->messages()], 200);
         $event = \App\Models\Event::findOrFail($data['event_id']);
         $room = $event->rooms()->whereIn('sex', [$attendee->sex, 'c'])->findOrFail($data['room_id']);
+        $price = $room->pivot->price;
         $cots = \App\Models\Cot::where('cots.room_id', '=', $room->id)
             ->leftJoin('reservations', 'cots.id', '=', 'reservations.cot_id')
-            ->select('cots.*', 'reservations.first_name', 'reservations.last_name')
-            ->get();
+            // ->join('rooms', 'cots.room_id', '=', 'rooms.id')
+            // ->join('event_room', 'event_room.room_id' , '=', 'rooms.id')
+            // ->where()
+            ->select('cots.*', 'reservations.first_name', 'reservations.last_name',)
+            ->get()->toArray();
+        $cots = array_map(function ($cot) use ($price) {
+            $cot['price'] = $price;
+            return $cot;
+        }, $cots);
         return response()->json($cots, 200);
     }
 
@@ -410,11 +449,20 @@ class ApiController extends Controller
 
     public function upcoming_events(Request $request)
     {
-        return \App\Models\Event::select('id', 'name', 'start_on', 'end_on')
+        $events = \App\Models\Event::select('id', 'name', 'start_on', 'end_on')
             ->where('end_on', '>=', Carbon::now())
             ->where('status', '=', 'published')
             ->orderBy('start_on', 'desc')
             ->get();
+        $reservations = \App\Models\Reservation::where('attendee_id', auth('api')->user()->id)
+            ->whereIn('event_id', $events->pluck('id'))->get()->toArray();
+
+        return array_map(function ($event) use ($reservations) {
+            $event['reservations'] = array_map(function ($reservation) {
+                return $reservation['id'];
+            }, $reservations);
+            return $event;
+        }, $events->toArray());
     }
 
     public function capacity(Request $request)

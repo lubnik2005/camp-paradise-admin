@@ -15,32 +15,49 @@ class StripeController extends Controller
 
     public function createPaymentIntent(Request $request)
     {
-        $data = $request->only('event_id', 'cot_id', 'room_id');
+        $data = $request->only('user_id', 'cart');
         $validator = Validator::make($data, [
-            'event_id' => 'required|integer',
-            'cot_id' => 'required|integer',
-            'room_id' => 'required|integer',
+            'cart' => 'required|array|size:1',
+            'cart.*.event_id' => 'required|integer',
+            'cart.*.cot_id' => 'required|integer',
+            'cart.*.room_id' => 'required|integer',
         ]);
         if ($validator->fails()) {
             return response()->json(['error' => $validator->messages()], 500);
         }
 
         $attendee = auth('api')->user();
-        $event = \App\Models\Event::findOrFail($data['event_id']);
-        $cot = \App\Models\Cot::findOrFail($data['cot_id']);
-        $room = \App\Models\Room::findOrFail($data['room_id']);
+
+        $totalPrice = 0;
+        $confirm_cart = array_map(function ($product) use ($attendee, &$totalPrice) {
+            $event = \App\Models\Event::findOrFail($product['event_id']);
+            $cot = \App\Models\Cot::findOrFail($product['cot_id']);
+            $room = \App\Models\Room::findOrFail($product['room_id']);
+            $room = $event->rooms()->whereIn('sex', [$attendee->sex, 'c'])->findOrFail($product['room_id']);
+            $price = $room->pivot->price;
+            $totalPrice += $price;
+            return [
+                'user_id' => strval($attendee->id),
+                'user_email' => $attendee->email,
+                'event_id' => strval($event->id),
+                'event_name' => $event->name,
+                'cot_id' => strval($cot->id),
+                'cot_description' => $cot->description,
+                'room_id' => strval($room->id),
+                'room_name' => $room->name,
+                'room_price' => $price
+            ];
+        }, $data['cart']);
 
         $payment = $attendee->pay(
-            $amount = 15000,
+            $amount = $totalPrice,
             [
                 'metadata' => [
-                    'user_id' => $attendee->id,
-                    'event_id' => $event->id,
-                    'cot_id' => $cot->id,
-                    'room_id' => $room->id
+                    'cart' => json_encode($confirm_cart) // NOTE: Maximum of 500 characters
                 ]
             ]
         );
+        unset($totalPrice);
         return response()->json(['paymentInfo' => $payment, 'clientSecret' => $payment->client_secret]);
     }
 

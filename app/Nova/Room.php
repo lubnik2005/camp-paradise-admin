@@ -63,7 +63,11 @@ class Room extends Resource
             Text::make('Location')->sortable()->rules('required'),
             Number::make('Size')->rules('required'),
             HasMany::make('Cots'),
-            BelongsToMany::make('Events')
+            BelongsToMany::make('Events')->fields(function () {
+                return [
+                    Text::make('Price')->help('Warning: This value is in pennies/cents NOT dollars.'),
+                ];
+            })
         ];
     }
 

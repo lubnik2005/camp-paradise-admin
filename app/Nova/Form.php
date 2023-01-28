@@ -3,21 +3,20 @@
 namespace App\Nova;
 
 use Illuminate\Http\Request;
-use Laravel\Nova\Fields\BelongsToMany;
-use Laravel\Nova\Fields\DateTime;
-use Laravel\Nova\Fields\Select;
+use Laravel\Nova\Fields\ID;
 use Laravel\Nova\Fields\Text;
-use Laravel\Nova\Fields\Number;
+use Laravel\Nova\Fields\Boolean;
+use Laravel\Nova\Fields\Code;
 use Laravel\Nova\Http\Requests\NovaRequest;
 
-class Event extends Resource
+class Form extends Resource
 {
     /**
      * The model the resource corresponds to.
      *
-     * @var string
+     * @var class-string<\App\Models\Form>
      */
-    public static $model = \App\Models\Event::class;
+    public static $model = \App\Models\Form::class;
 
     /**
      * The single value that should be used to represent the resource when being displayed.
@@ -32,7 +31,7 @@ class Event extends Resource
      * @var array
      */
     public static $search = [
-        'id',
+        'name',
     ];
 
     /**
@@ -44,18 +43,10 @@ class Event extends Resource
     public function fields(NovaRequest $request)
     {
         return [
-            Text::make('Name')->sortable()->rules('required'),
-            Select::make('Status')->sortable()
-                ->rules('required')
-                ->options(['in_progress' => 'In progress', 'published' => 'Published'])
-                ->displayUsingLabels(),
-            DateTime::make('Start On')->sortable()->rules('required'),
-            DateTime::make('End On')->sortable()->rules('required'),
-            BelongsToMany::make('Rooms')->fields(function () {
-                return [
-                    Number::make('Price')->help('Warning: This value is in pennies/cents NOT dollars.'),
-                ];
-            })
+            ID::make()->sortable(),
+            Text::make('Name'),
+            Boolean::make('Required'),
+            Code::make('Questions')->json(),
         ];
     }
 
