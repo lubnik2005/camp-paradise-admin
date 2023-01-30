@@ -52,7 +52,7 @@ class Attendee extends Resource
                 ->displayUsing(fn () => $this->stripe_id ? env('STRIPE_DASHBOARD_URL', 'https://dashboard.stripe.com/') . 'customers/' . $this->stripe_id : '')
                 ->sortable(),
             DateTime::make('Email Verified At')->sortable(),
-            Text::make('Church')->sortable()->rules('required'),
+            Text::make('Church')->sortable(),
             Select::make('Sex')->sortable()->options(['m' => 'Male', 'f' => 'Female'])->rules('required'),
             Password::make('Password')->onlyOnForms(),
         ];
