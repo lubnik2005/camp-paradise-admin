@@ -45,6 +45,52 @@ class ApiController extends Controller
     // Right before stripe is sent, confirm that the reservation is still available
     public function verifyReservation(Request $request)
     {
+        $data = $request->only('cart');
+        $attendee = auth('api')->user();
+        $attendee_id = $attendee->id;
+        foreach ($data['cart'] as $key => $product) {
+            // Verify formula
+
+
+            foreach ($data['cart'] as $product) {
+                // Verify that reservation hasn't already been made
+                $event_id = $product['event_id'];
+                $cot_id = $product['cot_id'];
+                $room_id = $product['room_id'];
+                $attendee = \App\Models\Attendee::findOrFail($attendee_id);
+                $reservation = \App\Models\Reservation::where('event_id', '=', $event_id)
+                    ->where('room_id', '=', $room_id)
+                    ->where('cot_id', '=', $cot_id);
+                if ($reservation->exists()) {
+                    $reservation_id = $reservation->first()->id;
+
+                    Log::error("Duplication of reservation ID:$reservation_id with attendee ID: $attendee_id");
+                    return response()->json(['error' => ['cot_id' => 'Reservation failed. Cot already taken.']], 400);
+                }
+
+                $events = \App\Models\Event::where('events.id', '=', $event_id)->where('status', '=', 'published');
+                if (!$events->exists()) {
+                    Log::error("Event is not published: $event_id | Attendee: $attendee_id");
+                    return response()->json(['error' => ['cot_id' => 'Event not available']], 400);
+                }
+                $event = $events->first();
+                $rooms = $event->rooms()->where('rooms.id', '=', $room_id)->where(function ($query) use ($attendee) {
+                    return $query->where('sex', '=', $attendee->sex)->orWhere('sex', '=', 'c');
+                })->whereNull('deleted_at');
+                if (!$rooms->exists()) {
+                    Log::error("Room is not available: $room_id | Attendee: $attendee_id");
+                    return response()->json(['error' => ['room_id' => 'Room is not available.']], 400);
+                }
+                $room = $rooms->first();
+                $cots = $room->cots();
+                if (!$cots->exists()) {
+                    Log::error("Cot is not available: $cot_id| Attendee: $attendee_id");
+                    return response()->json(['error' => ['room_id' => 'Cot is not available.']], 400);
+                }
+
+                return response()->json(['success' => ['reservation' => 'Event, Room, Cot available.']], 200);
+            }
+        }
 
         //return response()->json([], 200);
         return response()->json(['message' => 'Reservation/Cot is no longer available.'], 500);
