@@ -29,7 +29,7 @@ class ApiController extends Controller
      */
     public function __construct()
     {
-        $this->middleware('auth:api', ['except' => ['login', 'register', 'verify', 'resend', 'resetPassword', 'newPassword']]);
+        $this->middleware('auth:api', ['except' => ['login', 'register', 'verify', 'resend', 'resetPassword', 'newPassword', 'myAccount']]);
     }
 
     public function forms(Request $request)
@@ -241,6 +241,17 @@ class ApiController extends Controller
         $attendee->password = bcrypt($password);
         $attendee->save();
         return response()->json(['message' => 'Reset Password.', 200]);
+    }
+
+    public function myAccount()
+    {
+        $user = auth('api')->user();
+        if (!$user) {
+            return response()->json(['message' => 'Can\'t authenticate user.', 403]);
+        }
+        $user->displayName = $user->first_name . ' ' . $user->last_name;
+        $user->photoURL = 'https://www.gravatar.com/avatar/6d0ece2e08fcf747016e398b63d1b678?s=300';
+        return response()->json(['user' => $user]);
     }
 
     /**

@@ -84,6 +84,7 @@ Route::group(['middleware' => 'api'], function ($router) {
     Route::post('reserve', [ApiController::class, 'reserve']);
     Route::post('register', [ApiController::class, 'register']);
     Route::post('login', [ApiController::class, 'login']);
+    Route::get('my-account', [ApiController::class, 'myAccount']);
     Route::get('refresh', [ApiController::class, 'refresh']);
     Route::get('me', [ApiController::class, 'me']);
     Route::get('reservations', [ApiController::class, 'reservations']);
