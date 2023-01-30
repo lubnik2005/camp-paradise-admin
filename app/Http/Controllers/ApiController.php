@@ -231,7 +231,7 @@ class ApiController extends Controller
         //     "isPublic": true
         // }
         $user->displayName = $user->first_name . ' ' . $user->last_name;
-        $user->photoURL = 'https://api-dev-minimal-v4.vercel.app/assets/images/avatars/avatar_default.jpg';
+        $user->photoURL = 'https://www.gravatar.com/avatar/6d0ece2e08fcf747016e398b63d1b678?s=300';
         return response()->json(['accessTokenFull' => $accessToken, 'accessToken' => $token, 'user' => $user]);
     }
 
