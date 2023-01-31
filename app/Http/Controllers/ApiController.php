@@ -218,8 +218,8 @@ class ApiController extends Controller
 
         try {
             $token = $parser->parse($data['token']);
-        } catch (CannotDecodeContent | InvalidTokenStructure | UnsupportedHeaderFound $e) {
-            echo 'Oh no, an error: ' . $e->getMessage();
+        } catch (CannotDecodeContent | InvalidTokenStructure | UnsupportedHeaderFound | \TypeError $e) {
+            return response()->json(['error' => ['bad_token' => 'Token is invalid. Please resend the E-mail.']], 403);
         }
         assert($token instanceof UnencryptedToken);
 

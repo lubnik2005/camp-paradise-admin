@@ -884,7 +884,7 @@ button.es-button {
                                                                         <table width="100%" cellspacing="0" cellpadding="0">
                                                                             <tbody>
                                                                                 <tr>
-                                                                                    <td class="esd-block-image es-p25t es-p25b es-p35r es-p35l" align="center" style="font-size:0"><a target="_blank" href="https://viewstripo.email/"><img src="https://tlr.stripocdn.email/content/guids/CABINET_75694a6fc3c4633b3ee8e3c750851c02/images/67611522142640957.png" alt style="display: block;" width="120"></a></td>
+                                                                                    <td class="esd-block-image es-p25t es-p25b es-p35r es-p35l" align="center" style="font-size:0"><a target="_blank" href="https://www.camp-paradise.org"><img src="https://www.camp-paradise.org/static/media/Logo.7be05888.png" alt style="display: block;" width="120"></a></td>
                                                                                 </tr>
                                                                                 <tr>
                                                                                     <td class="esd-block-text es-p10b" align="center">
@@ -965,15 +965,15 @@ button.es-button {
                                                                                                         <p>Purchased Item ({{ $reservation->stripe_payment_intent }})</p>
                                                                                                     </td>
                                                                                                     <td style="padding: 5px 0" width="20%" align="left">
-                                                                                                        <p>$100.00</p>
+                                                                                                        <p>$170.00</p>
                                                                                                     </td>
                                                                                                 </tr>
                                                                                                 <tr>
                                                                                                     <td style="padding: 5px 10px 5px 0" width="80%" align="left">
-                                                                                                        <p>Sales Tax</p>
+                                                                                                        <p></p>
                                                                                                     </td>
                                                                                                     <td style="padding: 5px 0" width="20%" align="left">
-                                                                                                        <p>$0.00</p>
+                                                                                                        <p></p>
                                                                                                     </td>
                                                                                                 </tr>
                                                                                             </tbody>
@@ -1002,7 +1002,7 @@ button.es-button {
                                                                                             <tbody>
                                                                                                 <tr>
                                                                                                     <td width="80%">
-                                                                                                        <h4>TOTAL</h4>
+                                                                                                        <h4>Total</h4>
                                                                                                     </td>
                                                                                                     <td width="20%">
                                                                                                         <h4>${{ $reservation->stripe_payment_intent }}</h4>
@@ -1036,9 +1036,9 @@ button.es-button {
                                                                                 </tr>
                                                                                 <tr>
                                                                                     <td class="esd-block-text es-p10b" align="left">
-                                                                                        <p>675 Massachusetts Avenue</p>
-                                                                                        <p>11th Floor</p>
-                                                                                        <p>Cambridge, MA 02139</p>
+                                                                                        <p>12725 La Porte Rd, 
+                                                                                        <p>Strawberry Valley, </p></p>
+                                                                                        <p>CA 95981</p>
                                                                                     </td>
                                                                                 </tr>
                                                                             </tbody>
@@ -1061,7 +1061,7 @@ button.es-button {
                                                                                 </tr>
                                                                                 <tr>
                                                                                     <td class="esd-block-text" align="left">
-                                                                                        <p>January 1st, 2016</p>
+                                                                                        <p>{{ $event->start_on}} - {{ $event->end_on}}</p>
                                                                                     </td>
                                                                                 </tr>
                                                                             </tbody>
@@ -1095,11 +1095,11 @@ button.es-button {
                                                                             <tbody>
                                                                                 <tr>
                                                                                     <td class="esd-block-text es-p25t" align="center">
-                                                                                        <h2 style="color: #ffffff; font-size: 24px;">Get 25% off your next order.</h2>
+                                                                                        <h2 style="color: #ffffff; font-size: 24px;"></h2></h2>
                                                                                     </td>
                                                                                 </tr>
                                                                                 <tr>
-                                                                                    <td class="esd-block-button es-p30t es-p15b es-p10r es-p10l" align="center"><span class="es-button-border"><a href="https://viewstripo.email/" class="es-button" target="_blank">Awesome</a></span></td>
+                                                                                    <td a></span></td>
                                                                                 </tr>
                                                                             </tbody>
                                                                         </table>
@@ -1130,17 +1130,17 @@ button.es-button {
                                                                         <table width="100%" cellspacing="0" cellpadding="0">
                                                                             <tbody>
                                                                                 <tr>
-                                                                                    <td class="esd-block-image es-p15b" align="center" style="font-size:0"><a target="_blank"><img src="https://tlr.stripocdn.email/content/guids/CABINET_75694a6fc3c4633b3ee8e3c750851c02/images/12331522050090454.png" alt="Beretun logo" style="display: block;" title="Beretun logo" width="37"></a></td>
+                                                                                    <td class="esd-block-image es-p15b" align="center" style="font-size:0"><a target="_blank"><img src="https://www.camp-paradise.org/static/media/Logo.7be05888.png" alt="Beretun logo" style="display: block;" title="Beretun logo" width="37"></a></td>
                                                                                 </tr>
                                                                                 <tr>
                                                                                     <td class="esd-block-text es-p35b" align="center">
-                                                                                        <p><strong>675 Massachusetts Avenue </strong></p>
-                                                                                        <p><strong>Cambridge, MA 02139</strong></p>
+                                                                                        <p><strong> </strong></p>
+                                                                                        <p><strong></strong></p>
                                                                                     </td>
                                                                                 </tr>
                                                                                 <tr>
                                                                                     <td esdev-links-color="#777777" align="left" class="esd-block-text es-m-txt-c es-p5b">
-                                                                                        <p style="color: #777777;">If you didn't create an account using this email address, please ignore this email or email us at (( email here )).</p>
+                                                                                        <p style="color: #777777;">If you didn't create an account using this email address, please ignore this email.</p>
                                                                                     </td>
                                                                                 </tr>
                                                                             </tbody>

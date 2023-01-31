@@ -15,12 +15,13 @@ class StripeController extends Controller
 
     public function createPaymentIntent(Request $request)
     {
-        $data = $request->only('user_id', 'cart');
+        $data = $request->only('user_id', 'cart', 'billing');
         $validator = Validator::make($data, [
             'cart' => 'required|array|size:1',
             'cart.*.event_id' => 'required|integer',
             'cart.*.cot_id' => 'required|integer',
             'cart.*.room_id' => 'required|integer',
+            'billing' => 'required',
         ]);
         if ($validator->fails()) {
             return response()->json(['error' => $validator->messages()], 500);
@@ -49,12 +50,28 @@ class StripeController extends Controller
             ];
         }, $data['cart']);
 
+        $confirm_cart = json_encode($confirm_cart);
+        $billing = $data['billing'];
+
         $payment = $attendee->pay(
             $amount = $totalPrice,
             [
                 'metadata' => [
                     'cart' => json_encode($confirm_cart) // NOTE: Maximum of 500 characters
-                ]
+                ],
+                // 'billing_details' => [
+                //     'email' => $attendee->email,
+                //     'phone' => $billing['phoneNumber'],
+                //     'name' => $billing['receiver'],
+                //     'address' => [
+                //         'city' => $billing['city'],
+                //         'country' => $billing['countryCode'],
+                //         'postal_code' => $billing['zipCode'],
+                //         'state' => $billing['state'],
+                //         'line1' => $billing['line1'],
+                //     ]
+                // ],
+                'description' => 'Youth Camp Reservation'
             ]
         );
         unset($totalPrice);
