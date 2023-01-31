@@ -483,7 +483,19 @@ class ApiController extends Controller
     public function reservations(Request $request)
     {
         $attendee = auth('api')->user();
-        $reservations = \App\Models\Reservation::where('attendee_id', '=', $attendee->id);
+        $reservations = \App\Models\Reservation::with('room:id,name', 'cot:id,description', 'event:id,name')
+            //->select('first_name', 'last_name', 'price', 'created_at', 'room.id', 'room.name')
+
+            // ->select(
+            //     'reservations.first_name',
+            //     'reservations.last_name',
+            //     'reservations.price',
+            //     'room.name',
+            //     'event.name',
+            //     'cot.description'
+            // )
+            ->where('attendee_id', '=', $attendee->id)
+            ->get();
         return response()->json($reservations, 200);
     }
 
