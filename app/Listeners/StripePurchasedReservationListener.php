@@ -110,6 +110,8 @@ class StripePurchasedReservationListener
                         'cot_id' => $product['cot_id'],
                         'price' => $product['room_price'],
                         'stripe_payment_intent' => $object['payment_intent'],
+                        'created_at' => \Carbon\Carbon::now(),
+                        'updated_at' => \Carbon\Carbon::now(),
                     ];
                 }, $data['cart']);
 

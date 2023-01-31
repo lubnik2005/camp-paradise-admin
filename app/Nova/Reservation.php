@@ -8,6 +8,7 @@ use Laravel\Nova\Fields\Text;
 use Laravel\Nova\Fields\URL;
 use Laravel\Nova\Fields\Number;
 use Laravel\Nova\Fields\BelongsTo;
+use Laravel\Nova\Fields\DateTime;
 use Laravel\Nova\Http\Requests\NovaRequest;
 
 class Reservation extends Resource
@@ -55,6 +56,8 @@ class Reservation extends Resource
             BelongsTo::make('Event')->sortable()->rules('required'),
             BelongsTo::make('Room')->sortable()->rules('required'),
             BelongsTo::make('Cot')->sortable()->rules('required'),
+            DateTime::make('Updated At')->exceptOnForms(),
+            DateTime::make('Created At')->exceptOnForms(),
         ];
     }
 
