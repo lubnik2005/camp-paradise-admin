@@ -489,10 +489,20 @@ class ApiController extends Controller
 
     public function events(Request $request)
     {
-        return \App\Models\Event::select('id', 'name', 'start_on', 'end_on')
+
+        $events = \App\Models\Event::select('id', 'name', 'start_on', 'end_on')
             ->where('status', '=', 'published')
             ->orderBy('start_on', 'desc')
             ->get();
+        $reservations = \App\Models\Reservation::where('attendee_id', auth('api')->user()->id)
+            ->whereIn('event_id', $events->pluck('id'))->get()->toArray();
+
+        return array_map(function ($event) use ($reservations) {
+            $event['reservations'] = array_map(function ($reservation) {
+                return $reservation['id'];
+            }, $reservations);
+            return $event;
+        }, $events->toArray());
     }
 
     public function previous_events(Request $request)
