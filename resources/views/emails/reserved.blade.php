@@ -965,7 +965,7 @@ button.es-button {
                                                                                                         <p>Purchased Item ({{ $reservation->stripe_payment_intent }})</p>
                                                                                                     </td>
                                                                                                     <td style="padding: 5px 0" width="20%" align="left">
-                                                                                                        <p>$170.00</p>
+                                                                                                        <p>{{ $reservation->price }}</p>
                                                                                                     </td>
                                                                                                 </tr>
                                                                                                 <tr>
@@ -1005,7 +1005,7 @@ button.es-button {
                                                                                                         <h4>Total</h4>
                                                                                                     </td>
                                                                                                     <td width="20%">
-                                                                                                        <h4>${{ $reservation->stripe_payment_intent }}</h4>
+                                                                                                        <h4>${{ $reservation->price }}</h4>
                                                                                                     </td>
                                                                                                 </tr>
                                                                                             </tbody>
