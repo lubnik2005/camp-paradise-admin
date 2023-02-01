@@ -65,7 +65,7 @@ class ApiController extends Controller
                     $reservation_id = $reservation->first()->id;
 
                     Log::error("Duplication of reservation ID:$reservation_id with attendee ID: $attendee_id");
-                    return response()->json(['error' => ['cot_id' => 'Reservation failed. Cot already taken.']], 400);
+                    return response()->json(['error' => ['cot_id' => 'Reservation failed. Cot already taken.']], 403);
                 }
 
                 $events = \App\Models\Event::where('events.id', '=', $event_id)->where('status', '=', 'published');
