@@ -3,6 +3,7 @@
 namespace App\Nova;
 
 use Illuminate\Http\Request;
+use Laravel\Nova\Fields\ID;
 use Laravel\Nova\Fields\Text;
 use Laravel\Nova\Fields\Select;
 use Laravel\Nova\Fields\DateTime;
@@ -45,6 +46,7 @@ class Attendee extends Resource
     public function fields(NovaRequest $request)
     {
         return [
+            ID::make(),
             Text::make('Email')->sortable()->rules('required'),
             Text::make('First Name')->sortable()->rules('required'),
             Text::make('Last Name')->sortable()->rules('required'),

@@ -94,7 +94,7 @@ class ReservedCot extends Mailable
     public function content()
     {
         return new Content(
-            view: 'emails.reserved',
+            view: 'emails.receipt-email-section',
             //text: 'emails.orders.reserved-text'
         );
     }

@@ -265,7 +265,7 @@ class ApiController extends Controller
 
         if (!$token = auth('api')->attempt($credentials)) return response()->json(['message' => 'Email/Password combination not found.'], 400); //->json(['error' => ['error' => ['Credentials not found.']]], 401);
         $user = auth('api')->user();
-        if (!$user->email_verified_at) return response()->json(['message' => 'Email not verified.'], 400); //, ->json(['error' => ['error' => ['Email not verified.']]], 402);
+        if (!$user->email_verified_at) return response()->json(['message' => 'Email not verified.'], 410); //, ->json(['error' => ['error' => ['Email not verified.']]], 402);
         $accessToken = [
             'accessToken' => $token,
             'tokenType' => 'bearer',

@@ -112,7 +112,7 @@ class VerifyEmail extends Mailable
     public function content()
     {
         return new Content(
-            view: 'emails.verify-email',
+            view: 'emails.verify-email-section',
             //text: 'emails.orders.reserved-text'
         );
     }

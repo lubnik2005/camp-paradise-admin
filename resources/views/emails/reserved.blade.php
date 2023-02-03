@@ -965,7 +965,7 @@ button.es-button {
                                                                                                         <p>Purchased Item ({{ $reservation->stripe_payment_intent }})</p>
                                                                                                     </td>
                                                                                                     <td style="padding: 5px 0" width="20%" align="left">
-                                                                                                        <p>{{ $reservation->price }}</p>
+                                                                                                        <p>{{ $reservation->price / 100 }}</p>
                                                                                                     </td>
                                                                                                 </tr>
                                                                                                 <tr>
@@ -1005,7 +1005,7 @@ button.es-button {
                                                                                                         <h4>Total</h4>
                                                                                                     </td>
                                                                                                     <td width="20%">
-                                                                                                        <h4>${{ $reservation->price }}</h4>
+                                                                                                        <h4>${{ $reservation->price / 100 }}</h4>
                                                                                                     </td>
                                                                                                 </tr>
                                                                                             </tbody>
@@ -1079,27 +1079,30 @@ button.es-button {
                                 </tr>
                             </tbody>
                         </table>
-                        <table class="es-content" cellspacing="0" cellpadding="0" align="center">
+                        <table class="es-footer" cellspacing="0" cellpadding="0" align="center">
                             <tbody>
                                 <tr>
-                                    <td class="esd-stripe" esd-custom-block-id="7797" align="center">
-                                        <table class="es-content-body" style="background-color: #1c6937;" width="600" cellspacing="0" cellpadding="0" bgcolor="#1b9ba3" align="center">
+                                    <td class="esd-stripe"  align="center">
+                                        <table class="es-footer-body" width="600" cellspacing="0" cellpadding="0" bgcolor="#ffffff" align="center">
                                             <tbody>
                                                 <tr>
-                                                    <td class="esd-structure es-p35t es-p35b es-p35r es-p35l" align="left">
+                                                    <td class="esd-structure es-p10t es-p30b es-p20r es-p20l" style="background-color: #1c6937;" bgcolor="#1c6937" align="left">
                                                         <table width="100%" cellspacing="0" cellpadding="0">
                                                             <tbody>
                                                                 <tr>
-                                                                    <td class="esd-container-frame" width="530" valign="top" align="center">
+                                                                    <td class="esd-container-frame" width="560" valign="top" align="center">
                                                                         <table width="100%" cellspacing="0" cellpadding="0">
                                                                             <tbody>
                                                                                 <tr>
-                                                                                    <td class="esd-block-text es-p25t" align="center">
-                                                                                        <h2 style="color: #ffffff; font-size: 24px;"></h2></h2>
+                                                                                    <td class="esd-block-text es-p5t es-p5b" align="left">
+                                                                                        <h2 style="font-size: 16px; color: #ffffff;"><strong>Have quastions?</strong></h2>
                                                                                     </td>
                                                                                 </tr>
                                                                                 <tr>
-                                                                                    <td a></span></td>
+                                                                                    <td esd-links-underline="none" esd-links-color="#ffffff" class="esd-block-text es-p5b" align="left">
+                                                                                        <p style="font-size: 14px; color: #ffffff;">We are here to help, learn more about us <a target="_blank" style="font-size: 14px; color: #ffffff; text-decoration: none;">here</a></p>
+                                                                                        <p style="font-size: 14px; color: #ffffff;">or <a target="_blank" style="font-size: 14px; text-decoration: none; color: #ffffff;">contact us</a><br></p>
+                                                                                    </td>
                                                                                 </tr>
                                                                             </tbody>
                                                                         </table>
@@ -1129,15 +1132,6 @@ button.es-button {
                                                                     <td class="esd-container-frame" width="530" valign="top" align="center">
                                                                         <table width="100%" cellspacing="0" cellpadding="0">
                                                                             <tbody>
-                                                                                <tr>
-                                                                                    <td class="esd-block-image es-p15b" align="center" style="font-size:0"><a target="_blank"><img src="https://www.camp-paradise.org/static/media/Logo.7be05888.png" alt="Beretun logo" style="display: block;" title="Beretun logo" width="37"></a></td>
-                                                                                </tr>
-                                                                                <tr>
-                                                                                    <td class="esd-block-text es-p35b" align="center">
-                                                                                        <p><strong> </strong></p>
-                                                                                        <p><strong></strong></p>
-                                                                                    </td>
-                                                                                </tr>
                                                                                 <tr>
                                                                                     <td esdev-links-color="#777777" align="left" class="esd-block-text es-m-txt-c es-p5b">
                                                                                         <p style="color: #777777;">If you didn't create an account using this email address, please ignore this email.</p>

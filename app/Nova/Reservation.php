@@ -52,7 +52,7 @@ class Reservation extends Resource
             URL::make('Stripe', fn () => $this->stripe_payment_intent ? env('STRIPE_DASHBOARD_URL', 'https://dashboard.stripe.com/') . 'payments/' . $this->stripe_payment_intent : '')
                 ->displayUsing(fn () => $this->stripe_payment_intent ? env('STRIPE_DASHBOARD_URL', 'https://dashboard.stripe.com/') . 'payments/' . $this->stripe_payment_intent : '')
                 ->sortable(),
-            BelongsTo::make('Attendee Account', 'attendee', Attendee::class)->sortable()->rules('required'),
+            BelongsTo::make('Attendee Account', 'attendee', Attendee::class)->sortable()->rules('required')->searchable(),
             BelongsTo::make('Event')->sortable()->rules('required'),
             BelongsTo::make('Room')->sortable()->rules('required'),
             BelongsTo::make('Cot')->sortable()->rules('required'),

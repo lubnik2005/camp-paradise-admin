@@ -102,16 +102,26 @@ Route::post('/stripe-webhook', [StripeController::class, 'stripeWebhook']);
 
 Route::get('/mailable', function () {
     //return view('emails.reserved', ['name' => 'James']);
-    $attendee = \App\Models\Attendee::findOrFail(1);
+    $attendee = \App\Models\Attendee::findOrFail(15);
     $camp_event = \App\Models\Event::findOrFail(1);
-    $room = \App\Models\Room::findOrFail(4);
-    $cot = \App\Models\Cot::findOrFail(4);
-    $reservation = \App\Models\Reservation::findOrFail(2);
+    $room = \App\Models\Room::findOrFail(3);
+    $cot = \App\Models\Cot::findOrFail(1);
+    $reservation = \App\Models\Reservation::findOrFail(18);
 
     return new \App\Mail\ReservedCot($attendee, $camp_event, $room, $cot, $reservation);
 });
 
 Route::get('/verify-email', function () {
-    $attendee = \App\Models\Attendee::findOrFail(1);
+    $attendee = \App\Models\Attendee::findOrFail(15);
     return new \App\Mail\VerifyEmail($attendee);
 });
+
+// Route::get('/receipt-email', function () {
+//     $attendee = \App\Models\Attendee::findOrFail(15);
+//     $attendee = \App\Models\Attendee::findOrFail(13);
+//     $camp_event = \App\Models\Event::findOrFail(1);
+//     $room = \App\Models\Room::findOrFail(3);
+//     $cot = \App\Models\Cot::findOrFail(1);
+//     $reservation = \App\Models\Reservation::findOrFail(17); 
+//     return new \App\Mail\ReservedCot($attendee, $event, $room, $cot, $reservation);
+// });
