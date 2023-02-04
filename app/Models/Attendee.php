@@ -19,9 +19,10 @@ class Attendee extends Authenticatable implements JWTSubject
     public static function boot()
     {
         parent::boot();
-        static::created(function ($user) {
+        static::created(function (Attendee $user) {
             $user->createAsStripeCustomer([
-                'email' => $user->email
+                'email' => $user->email,
+                'name' => $user->first_name . ' ' . $user->last_name
             ]);
         });
     }
