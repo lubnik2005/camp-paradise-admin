@@ -163,6 +163,7 @@
                     max-width: 600px;
                 "> --}}
             style="
+                    background: #1c6937 top center / auto no-repeat;
                     margin: 0px auto;
                     border-radius: 20px;
                     max-width: 600px;
