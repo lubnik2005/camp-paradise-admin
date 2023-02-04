@@ -107,7 +107,7 @@ class ResetPasswordEmail extends Mailable
     public function content()
     {
         return new Content(
-            view: 'emails.reset-password',
+            view: 'emails.reset-password-section',
             //text: 'emails.orders.reserved-text'
         );
     }

@@ -1,6 +1,10 @@
 @extends('emails/base-email')
 
 @section('title')
+    Camp Paradise Welcome
+@endsection
+
+@section('greeting')
     Welcome {{ $attendee->first_name }} {{ $attendee->last_name }},
 @endsection
 

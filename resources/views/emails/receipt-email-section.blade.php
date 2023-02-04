@@ -1,6 +1,10 @@
 @extends('emails/base-email')
 
 @section('title')
+    Camp Paradise Reservation
+@endsection
+
+@section('greeting')
     Hi {{ $attendee->first_name }} {{ $attendee->last_name }}, <br />
     Thank you for your order!
 @endsection
@@ -12,11 +16,11 @@
 
 @section('content-secondary')
     <!--[if mso | IE]>
-                                                                                                                                      </td>
-                                                                                                                                <table align="center" border="0" cellpadding="0" cellspacing="0" class="" style="width:600px;" width="600">
-                                                                                                                                    <tr>
-                                                                                                                                        <td style="line-height:0px;font-size:0px;mso-line-height-rule:exactly;">
-                                                                                                                                            <![endif]-->
+                                                                                                                                              </td>
+                                                                                                                                        <table align="center" border="0" cellpadding="0" cellspacing="0" class="" style="width:600px;" width="600">
+                                                                                                                                            <tr>
+                                                                                                                                                <td style="line-height:0px;font-size:0px;mso-line-height-rule:exactly;">
+                                                                                                                                                    <![endif]-->
     <div
         style="background: #ffffff; background-color: #ffffff; margin: 0px auto; border-radius: 20px; max-width: 600px;margin-top:30px">
         <div class="mj-column-per-100 mj-outlook-group-fix"
@@ -55,7 +59,7 @@
         </div>
     </div>
     <!--[if mso | IE]>
-                                                                                                                                        </td>
-                                                                                                                                    </tr>
-                                                                                                                                </table>
+                                                                                                                                                </td>
+                                                                                                                                            </tr>
+                                                                                                                                        </table>
 @endsection

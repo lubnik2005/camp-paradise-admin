@@ -19,7 +19,7 @@ class FormAnswer extends Model
      */
 
     protected $casts = [
-        'answers' => 'array',
+        'answers' => 'json',
         'signed_on' => 'datetime'
     ];
 
@@ -31,5 +31,10 @@ class FormAnswer extends Model
     public function attendee()
     {
         return $this->belongsTo(Attendee::class);
+    }
+
+    public function event()
+    {
+        return $this->belongsTo(Event::class);
     }
 }

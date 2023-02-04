@@ -34,12 +34,48 @@ class ApiController extends Controller
 
     public function forms(Request $request)
     {
-        $forms = \App\Models\Form::all()->toArray();
-        $forms = array_map(function ($form) {
-            $form['status'] = 'completed';
-            return $form;
-        }, $forms);
-        return response()->json($forms, 200);
+        $formAnswers = \App\Models\FormAnswer::where('attendee_id', '=', auth('api')->user()->id)
+            ->with('event:id,name', 'form:id,name')->get()->toArray();
+        $forms = \App\Models\Form::all();
+        $forms_events = [];
+        $forms->each(function ($form) use (&$forms_events) {
+            $events = \App\Models\Event::where('status', 'published')->get();
+            $events->each(function ($event) use ($form, &$forms_events) {
+                $form = $form->toArray();
+                $form['event'] = $event;
+                $forms_events[] = $form;
+            });
+        });
+
+        foreach ($forms_events as $key => &$form_event) {
+            $answers = \App\Models\FormAnswer::where('attendee_id', '=', auth('api')->user()->id)
+                ->where('form_id', '=', $form_event['id'])
+                ->where('event_id', '=', $form_event['event']['id']);
+            $form_event['signedOn'] = '';
+            $form_event['status'] =  'not started';
+            if ($answers->exists()) {
+                $answer = $answers->first();
+                $form_event['status'] =  'completed';
+                $form_event['signedOn'] = $answer->signed_on;
+            }
+        }
+        unset($form_event);
+
+        return response()->json($forms_events, 200);
+    }
+
+    public function form(Request $request)
+    {
+        $data = $request->only('data', 'campId', 'formId');
+        // TODO: ADD VALIDATION HERE
+        $form = new \App\Models\FormAnswer();
+        $form->event_id = $data['campId'];
+        $form->form_id = $data['formId'];
+        $form->answers = $data['data'];
+        $form->attendee_id = auth('api')->user()->id;
+        $form->signed_on = \Carbon\Carbon::now();
+        $form->save();
+        return response()->json(['success' => 'Form saved', 200]);
     }
 
     // Right before stripe is sent, confirm that the reservation is still available

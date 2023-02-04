@@ -3,7 +3,7 @@
     xmlns:o="urn:schemas-microsoft-com:office:office">
 
 <head>
-    <title>Welcome to [Coded Mails]</title>
+    <title>@yield('title')</title>
     <!--[if !mso]><!-- -->
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <!--<![endif]-->
@@ -323,7 +323,7 @@
                                             style="font-size: 0px; padding: 10px 25px; word-break: break-word;">
                                             <div
                                                 style="font-family: Montserrat, Helvetica, Arial, sans-serif; font-size: 20px; font-weight: 500; line-height: 30px; text-align: left; color: #8189a9;">
-                                                @yield('title')
+                                                @yield('greeting')
                                             </div>
                                         </td>
                                     </tr>
@@ -346,8 +346,9 @@
                                                     <td align="center" bgcolor="#0078be" role="presentation"
                                                         style="border: none; border-radius: 3px; cursor: auto; mso-padding-alt: 10px 25px; background: #0078be;"
                                                         valign="middle">
-                                                        <a href="@yield('button-url')" target="_blank"
-                                                            style="
+                                                        @hasSection('button-url')
+                                                            <a href="@yield('button-url')" target="_blank"
+                                                                style="
                                                                     display: inline-block;
                                                                     background: #1c6937;
                                                                     color: #ffffff;
@@ -362,9 +363,10 @@
                                                                     mso-padding-alt: 0px;
                                                                     border-radius: 3px;
                                                                 "
-                                                            target="_blank">
-                                                            @yield('button-content')
-                                                        </a>
+                                                                target="_blank">
+                                                                @yield('button-content')
+                                                            </a>
+                                                        @endif
                                                     </td>
                                                 </tr>
                                             </table>
