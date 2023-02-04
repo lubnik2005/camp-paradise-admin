@@ -469,7 +469,7 @@
                                 style="font-size: 0px; text-align: left; direction: ltr; display: inline-block; vertical-align: top; width: 100%;">
                                 <table border="0" cellpadding="0" cellspacing="0" role="presentation"
                                     style="vertical-align: top;" width="100%">
-                                    <tr>
+                                    {{-- <tr>
                                         <td align="center"
                                             style="font-size: 0px; padding: 10px 25px; word-break: break-word;">
                                             <!--[if mso | IE]>
@@ -594,7 +594,7 @@
         </table>
       <![endif]-->
                                         </td>
-                                    </tr>
+                                    </tr> --}}
                                     <tr>
                                         <td align="center"
                                             style="font-size: 0px; padding: 10px 25px; word-break: break-word;">
