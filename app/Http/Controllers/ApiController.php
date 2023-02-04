@@ -209,7 +209,7 @@ class ApiController extends Controller
             'firstName' => 'required|string',
             'lastName' => 'required|string',
             'email' => 'required|email|unique:attendees|unique:attendees',
-            'password' => 'required|string|min:6|max:50',
+            'password' => 'required|string|min:8|max:50',
             'gender' => 'required|string|in:m,f',
         ]);
 
@@ -507,7 +507,8 @@ class ApiController extends Controller
         }
 
         $event = \App\Models\Event::findOrFail($data['event_id']);
-        $rooms = $event->rooms()->whereIn('sex', [$attendee->sex, 'c'])->withCount('cots')->withCount('reservations')->get();
+        $rooms = $event->rooms()->whereIn('sex', [$attendee->sex, 'c'])
+            ->orderBy('rooms.name')->withCount('cots')->withCount('reservations')->get();
         return response()->json($rooms, 200);
     }
 
@@ -559,6 +560,7 @@ class ApiController extends Controller
             // ->join('event_room', 'event_room.room_id' , '=', 'rooms.id')
             // ->where()
             ->select('cots.*', 'reservations.first_name', 'reservations.last_name',)
+            ->orderBy('cots.description')
             ->get()->toArray();
         $cots = array_map(function ($cot) use ($price) {
             $cot['price'] = $price;
