@@ -25,6 +25,22 @@ class Cot extends Resource
      */
     public static $title = 'description';
 
+
+    /**
+     * The visual style used for the table. Available options are 'tight' and 'default'.
+     *
+     * @var string
+     */
+    public static $tableStyle = 'tight';
+
+    /**
+     * The number of resources to show per page via relationships.
+     *
+     * @var int
+     */
+    public static $perPageViaRelationship = 30;
+
+
     /**
      * The columns that should be searched.
      *
