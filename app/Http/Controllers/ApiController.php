@@ -32,6 +32,28 @@ class ApiController extends Controller
         $this->middleware('auth:api', ['except' => ['login', 'register', 'verify', 'resend', 'resetPassword', 'newPassword', 'myAccount']]);
     }
 
+
+    public function verifyForms(Request $request)
+    {
+        // Really should be sql stuff
+        $unfinishedForms = [];
+        $data = $request->only('cart');
+        foreach ($data['cart'] as $key => $product) {
+            $event_id = $product['event_id'];
+            $forms = \App\Models\Form::all();
+            $forms->each(function ($form) use ($event_id, &$unfinishedForms) {
+                $form_answers = \App\Models\FormAnswer::where('event_id', '=', $event_id)
+                    ->where('form_id', '=', $form->id)
+                    ->where('attendee_id', auth('api')->user()->id);
+                $event = \App\Models\Event::find($event_id);
+                if (!$form_answers->exists()) {
+                    $unfinishedForms[] = ['campId' => $event_id, 'campName' => $event->name, 'formId' => $form->id,];
+                }
+            });
+        }
+        return $unfinishedForms;
+    }
+
     public function forms(Request $request)
     {
         $formAnswers = \App\Models\FormAnswer::where('attendee_id', '=', auth('api')->user()->id)
@@ -68,11 +90,21 @@ class ApiController extends Controller
     {
         $data = $request->only('data', 'campId', 'formId');
         // TODO: ADD VALIDATION HERE
-        $form = new \App\Models\FormAnswer();
-        $form->event_id = $data['campId'];
-        $form->form_id = $data['formId'];
+        // Theres a better with like first or new, but it's 2 in the morning. I can't be bothered to
+        // read documentation
+
+        $forms = \App\Models\FormAnswer::where('event_id', '=', $data['campId'])
+            ->where('form_id', '=', $data['formId'])
+            ->where('attendee_id', '=', auth('api')->user()->id);
+        if ($forms->exists()) {
+            $form = $forms->first();
+        } else {
+            $form = new \App\Models\FormAnswer();
+            $form->event_id = $data['campId'];
+            $form->form_id = $data['formId'];
+            $form->attendee_id = auth('api')->user()->id;
+        }
         $form->answers = $data['data'];
-        $form->attendee_id = auth('api')->user()->id;
         $form->signed_on = \Carbon\Carbon::now();
         $form->save();
         return response()->json(['success' => 'Form saved', 200]);
@@ -84,6 +116,31 @@ class ApiController extends Controller
         $data = $request->only('cart');
         $attendee = auth('api')->user();
         $attendee_id = $attendee->id;
+
+
+
+        $unfinishedForms = [];
+        $data = $request->only('cart');
+        foreach ($data['cart'] as $key => $product) {
+            $event_id = $product['event_id'];
+            $forms = \App\Models\Form::all();
+            $forms->each(function ($form) use ($event_id, &$unfinishedForms) {
+                $form_answers = \App\Models\FormAnswer::where('event_id', '=', $event_id)
+                    ->where('form_id', '=', $form->id)
+                    ->where('attendee_id', auth('api')->user()->id);
+                $event = \App\Models\Event::find($event_id);
+                if (!$form_answers->exists()) {
+                    $unfinishedForms[] = ['campId' => $event_id, 'campName' => $event->name, 'formId' => $form->id,];
+                }
+            });
+        }
+
+
+        if (count($unfinishedForms) > 0) return response()->json(['error' => ['forms' => 'Forms not finished']], 400);
+
+
+
+
         foreach ($data['cart'] as $key => $product) {
             // Verify formula
 
