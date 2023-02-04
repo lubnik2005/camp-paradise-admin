@@ -212,6 +212,7 @@ class ApiController extends Controller
             'password' => 'required|string|min:8|max:50',
             'gender' => 'required|string|in:m,f',
         ]);
+        $data['email'] = strtolower($data['email']);
 
         //Send failed response if request is not valid
         if ($validator->fails()) {
@@ -220,12 +221,12 @@ class ApiController extends Controller
 
         //Request is valid, create new user
         $attendee = Attendee::create([
-            'first_name' => $request->firstName,
-            'last_name' => $request->lastName,
+            'first_name' => $data['firstName'],
+            'last_name' => $data['lastName'],
             'church' => '',
-            'email' => $request->email,
-            'sex' => $request->gender,
-            'password' => bcrypt($request->password),
+            'email' => $data['email'],
+            'sex' => $data['gender'],
+            'password' => bcrypt($data['password']),
         ]);
 
         Mail::mailer('ses')
@@ -246,6 +247,7 @@ class ApiController extends Controller
         $validator = Validator::make($data, [
             'email' => 'required|email',
         ]);
+        $data['email'] = strtolower($data['email']);
         $attendee = Attendee::where('email', $data['email'])->firstOrFail();
         if ($attendee->email_verified_at) {
             return response()->json(['error' => ['validated' => ['Email already validated.']]], 403);
@@ -296,6 +298,7 @@ class ApiController extends Controller
         $validator = Validator::make($data, [
             'email' => 'required|email',
         ]);
+        $data['email'] = strtolower($data['email']);
         $attendee = Attendee::where('email', $data['email'])->firstOrFail();
 
         Mail::mailer('ses')
@@ -307,6 +310,7 @@ class ApiController extends Controller
     public function newPassword(Request $request)
     {
         $data = $request->only('email', 'password', 'confirmPassword', 'token');
+        $data['email'] = strtolower($data['email']);
         $parser = new Parser(new JoseEncoder());
 
         try {
@@ -355,6 +359,7 @@ class ApiController extends Controller
     public function login()
     {
         $credentials = request(['email', 'password']);
+        $credentials['email'] = strtolower($credentials['email']);
 
         if (!$token = auth('api')->attempt($credentials)) return response()->json(['message' => 'Email/Password combination not found.'], 400); //->json(['error' => ['error' => ['Credentials not found.']]], 401);
         $user = auth('api')->user();
