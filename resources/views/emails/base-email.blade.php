@@ -156,9 +156,13 @@
         <v:fill  origin="0.5, 0" position="0.5, 0" src="https://images.unsplash.com/photo-1494253109108-2e30c049369b?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=600&q=80" type="tile" />
         <v:textbox style="mso-fit-shape-to-text:true" inset="0,0,0,0">
       <![endif]-->
-        <div
-            style="
+        <div {{-- style="
                     background: url(https://images.unsplash.com/photo-1494253109108-2e30c049369b?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=600&q=80) top center / auto no-repeat;
+                    margin: 0px auto;
+                    border-radius: 20px;
+                    max-width: 600px;
+                "> --}}
+            style="
                     margin: 0px auto;
                     border-radius: 20px;
                     max-width: 600px;
