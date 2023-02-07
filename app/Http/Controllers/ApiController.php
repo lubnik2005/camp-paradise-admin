@@ -208,16 +208,31 @@ class ApiController extends Controller
         $validator = Validator::make($data, [
             'firstName' => 'required|string',
             'lastName' => 'required|string',
-            'email' => 'required|email|unique:attendees|unique:attendees',
+            'email' => 'required|email|unique:attendees',
             'password' => 'required|string|min:8|max:50',
             'gender' => 'required|string|in:m,f',
         ]);
-        $data['email'] = strtolower($data['email']);
 
         //Send failed response if request is not valid
         if ($validator->fails()) {
             return response()->json(['message' => $validator->errors()->first()], 403);
         }
+        $data['email'] = strtolower($data['email']); // need to make sure its not uppercase
+        $validator = Validator::make($data, [
+            'email' => 'required|email|unique:attendees',
+        ]);
+
+        //Send failed response if request is not valid
+        if ($validator->fails()) {
+            return response()->json(['message' => $validator->errors()->first()], 403);
+        }
+
+
+
+
+
+
+
 
         //Request is valid, create new user
         $attendee = Attendee::create([
