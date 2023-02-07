@@ -33,7 +33,7 @@ class Room extends Resource
      *
      * @var int
      */
-    public static $perPageViaRelationship = 30;
+    public static $perPageViaRelationship = 20;
 
     /**
      * The single value that should be used to represent the resource when being displayed.

@@ -37,6 +37,20 @@ class Reservation extends Resource
     ];
 
     /**
+     * The visual style used for the table. Available options are 'tight' and 'default'.
+     *
+     * @var string
+     */
+    public static $tableStyle = 'tight';
+
+    /**
+     * The number of resources to show per page via relationships.
+     *
+     * @var int
+     */
+    public static $perPageViaRelationship = 20;
+
+    /**
      * Get the fields displayed by the resource.
      *
      * @param  \Laravel\Nova\Http\Requests\NovaRequest  $request
