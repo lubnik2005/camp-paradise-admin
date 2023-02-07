@@ -9,6 +9,7 @@ use Laravel\Nova\Fields\Select;
 use Laravel\Nova\Fields\DateTime;
 use Laravel\Nova\Fields\Password;
 use Laravel\Nova\Fields\URL;
+use Laravel\Nova\Fields\HasMany;
 use Laravel\Nova\Fields\PasswordConfirmation;
 use Laravel\Nova\Http\Requests\NovaRequest;
 
@@ -57,6 +58,7 @@ class Attendee extends Resource
             Text::make('Church')->sortable(),
             Select::make('Sex')->sortable()->options(['m' => 'Male', 'f' => 'Female'])->rules('required'),
             Password::make('Password')->onlyOnForms(),
+            HasMany::make('Reservations', 'reservations', Reservation::class),
         ];
     }
 
