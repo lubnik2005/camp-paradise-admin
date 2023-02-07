@@ -11,6 +11,8 @@ use Laravel\Nova\Fields\Select;
 use Laravel\Nova\Fields\Text;
 use Laravel\Nova\Fields\Number;
 use Laravel\Nova\Http\Requests\NovaRequest;
+use App\Nova\Metrics\EventMaleCount;
+use App\Nova\Metrics\EventFemaleCount;
 
 class Event extends Resource
 {
@@ -71,7 +73,14 @@ class Event extends Resource
      */
     public function cards(NovaRequest $request)
     {
-        return [];
+        return [
+            EventMaleCount::make()
+                ->onlyOnDetail()
+                ->width('1/4'),
+            EventFemaleCount::make()
+                ->onlyOnDetail()
+                ->width('1/4'),
+        ];
     }
 
     /**
