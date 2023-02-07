@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Laravel\Nova\Fields\ID;
 use Laravel\Nova\Fields\BelongsToMany;
 use Laravel\Nova\Fields\DateTime;
+use Laravel\Nova\Fields\HasMany;
 use Laravel\Nova\Fields\Select;
 use Laravel\Nova\Fields\Text;
 use Laravel\Nova\Fields\Number;
@@ -33,7 +34,7 @@ class Event extends Resource
      * @var array
      */
     public static $search = [
-        'id',
+        'id', 'name'
     ];
 
     /**
@@ -57,7 +58,8 @@ class Event extends Resource
                 return [
                     Number::make('Price')->help('Warning: This value is in pennies/cents NOT dollars.'),
                 ];
-            })
+            }),
+            HasMany::make('Reservations', 'reservations', Reservation::class)
         ];
     }
 
