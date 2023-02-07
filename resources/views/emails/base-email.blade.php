@@ -616,9 +616,9 @@
                                             <div
                                                 style="font-family: Montserrat, Helvetica, Arial, sans-serif; font-size: 14px; font-weight: 400; line-height: 22px; text-align: center; color: #8189a9;">
                                                 <p>
-                                                    {{-- <a style="font-size: 14px; color: #8189a9;"
+                                                    <a style="font-size: 14px; color: #8189a9;"
                                                         href="tel:{{ env('REPLY_CONTACT_PHONE') }}"
-                                                        target="_blank">{{ env('REPLY_CONTACT_PHONE') }}</a> | --}}
+                                                        target="_blank">{{ env('REPLY_CONTACT_PHONE') }}</a> |
                                                     <a style="font-size: 14px; color: #8189a9;"
                                                         href="mailto:{{ env('REPLY_CONTACT_EMAIL') }}"
                                                         target="_blank">{{ env('REPLY_CONTACT_EMAIL') }}</a>
