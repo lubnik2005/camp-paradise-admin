@@ -13,6 +13,7 @@ use Laravel\Nova\Fields\Number;
 use Laravel\Nova\Http\Requests\NovaRequest;
 use App\Nova\Metrics\EventMaleCount;
 use App\Nova\Metrics\EventFemaleCount;
+use App\Nova\Metrics\ReservationsTrend;
 
 class Event extends Resource
 {
@@ -78,6 +79,9 @@ class Event extends Resource
                 ->onlyOnDetail()
                 ->width('1/4'),
             EventFemaleCount::make()
+                ->onlyOnDetail()
+                ->width('1/4'),
+            ReservationsTrend::make()
                 ->onlyOnDetail()
                 ->width('1/4'),
         ];
