@@ -15,7 +15,7 @@ class ReservationsTrend extends Trend
      */
     public function calculate(NovaRequest $request)
     {
-        return $this->countByDays($request, \App\Models\Event::where('id', '=', $request->resourceId));
+        return $this->countByDays($request, \App\Models\Reservation::where('event_id', '=', $request->resourceId));
     }
 
     /**
