@@ -52,6 +52,6 @@ class Attendee extends Authenticatable implements JWTSubject
 
     public function forms()
     {
-        return $this->hasMany(Form::class);
+        return $this->hasMany(FormAnswer::class);
     }
 }
