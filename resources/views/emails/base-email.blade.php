@@ -97,7 +97,7 @@
 <body style="background-color: #f4f5fb;">
     <div
         style="display: none; font-size: 1px; color: #ffffff; line-height: 1px; max-height: 0px; max-width: 0px; opacity: 0; overflow: hidden;">
-        Preview - Welcome to Coded Mails</div>
+        Camp Paradise</div>
     <div style="background-color: #f4f5fb;">
         <!--[if mso | IE]>
             <table align="center" border="0" cellpadding="0" cellspacing="0" class="" style="width:600px;" width="600">
