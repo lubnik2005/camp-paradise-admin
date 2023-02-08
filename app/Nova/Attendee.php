@@ -57,7 +57,6 @@ class Attendee extends Resource
             DateTime::make('Email Verified At')->sortable(),
             DateTime::make('Updated At')->sortable(),
             DateTime::make('Created At')->sortable(),
-            Text::make('Church')->sortable(),
             Select::make('Sex')->sortable()->options(['m' => 'Male', 'f' => 'Female'])->rules('required'),
             Password::make('Password')->onlyOnForms(),
             HasMany::make('Reservations', 'reservations', Reservation::class),
