@@ -30,7 +30,6 @@ class Attendee extends Authenticatable implements JWTSubject
     protected $fillable = [
         'first_name',
         'last_name',
-        'church',
         'email',
         'sex',
         'password',

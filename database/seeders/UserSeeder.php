@@ -29,7 +29,6 @@ class UserSeeder extends Seeder
                 'first_name' => 'Nik',
                 'email' => 'lubnik2005@gmail.com',
                 'last_name' => 'Lubyanoy',
-                'church' => 'Baljic',
                 'password' => Hash::make('password'),
                 'sex' => 'm'
             ]

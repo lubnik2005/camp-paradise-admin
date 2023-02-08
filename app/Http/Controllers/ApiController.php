@@ -238,7 +238,6 @@ class ApiController extends Controller
         $attendee = Attendee::create([
             'first_name' => $data['firstName'],
             'last_name' => $data['lastName'],
-            'church' => '',
             'email' => $data['email'],
             'sex' => $data['gender'],
             'password' => bcrypt($data['password']),
