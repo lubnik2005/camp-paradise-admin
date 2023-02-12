@@ -11,6 +11,7 @@ use Laravel\Nova\Fields\Password;
 use Laravel\Nova\Fields\URL;
 use Laravel\Nova\Fields\HasMany;
 use Laravel\Nova\Fields\PasswordConfirmation;
+use Laravel\Nova\Actions\ExportAsCsv;
 use Laravel\Nova\Http\Requests\NovaRequest;
 
 class Attendee extends Resource
@@ -105,6 +106,8 @@ class Attendee extends Resource
      */
     public function actions(NovaRequest $request)
     {
-        return [];
+        return [
+            ExportAsCsv::make()->nameable(),
+        ];
     }
 }

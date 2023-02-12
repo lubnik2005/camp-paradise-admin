@@ -11,6 +11,7 @@ use Laravel\Nova\Fields\Select;
 use Laravel\Nova\Fields\Text;
 use Laravel\Nova\Fields\Number;
 use Laravel\Nova\Http\Requests\NovaRequest;
+use Laravel\Nova\Actions\ExportAsCsv;
 use App\Nova\Metrics\EventMaleCount;
 use App\Nova\Metrics\EventFemaleCount;
 use App\Nova\Metrics\ReservationsTrend;
@@ -117,6 +118,8 @@ class Event extends Resource
      */
     public function actions(NovaRequest $request)
     {
-        return [];
+        return [
+            ExportAsCsv::make()->nameable(),
+        ];
     }
 }
