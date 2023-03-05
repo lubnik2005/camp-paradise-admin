@@ -3,9 +3,11 @@
 namespace App\Nova;
 
 use Illuminate\Http\Request;
+use Laravel\Nova\Fields\FormData;
 use Laravel\Nova\Fields\ID;
 use Laravel\Nova\Fields\Text;
 use Laravel\Nova\Fields\URL;
+use Laravel\Nova\Fields\Select;
 use Laravel\Nova\Fields\Number;
 use Laravel\Nova\Fields\BelongsTo;
 use Laravel\Nova\Fields\DateTime;
@@ -70,7 +72,15 @@ class Reservation extends Resource
             BelongsTo::make('Attendee Account', 'attendee', Attendee::class)->sortable()->rules('required')->searchable(),
             BelongsTo::make('Event')->sortable()->rules('required'),
             BelongsTo::make('Room')->sortable()->rules('required'),
-            BelongsTo::make('Cot')->sortable()->rules('required'),
+            BelongsTo::make('Cot')->sortable()->exceptOnForms(),
+            Select::make('Cot', 'cot_id')->sortable()->dependsOn(
+                ['room'],
+                function (Select $field, NovaRequest $request, FormData $formData) {
+                    $roomId= (int) $formData->resource(Room::uriKey(), $formData->room);
+                    $cots = \App\Models\Cot::where('room_id', '=', $roomId)->get();
+                    $field->options($cots->pluck('description', 'id'));
+                }
+            )->rules('required')->onlyOnForms(),
             DateTime::make('Updated At')->exceptOnForms(),
             DateTime::make('Created At')->exceptOnForms(),
         ];
