@@ -118,7 +118,21 @@ class Reservation extends Resource
     public function actions(NovaRequest $request)
     {
         return [
-            ExportAsCsv::make()->nameable(),
+            ExportAsCsv::make()->nameable()->withFormat(function (\App\Models\Reservation $model) {
+                return [
+                    'Attendee First Name' => $model->attendee()->first()->first_name,
+                    'Attendee Last Name' => $model->attendee()->first()->last_name,
+                    'Attendee Email Address' => $model->attendee()->first()->email,
+                    'Reservation First Name' => $model->first_name,
+                    'Reservation Last Name' => $model->last_name,
+                    'Event Name' => $model->event()->first()->name,
+                    'Room Name' => $model->room()->first()->name,
+                    'Cot Description' => $model->cot()->first()->description,
+                    'Created At' => $model->created_at,
+                    'Updated At' => $model->updated_at,
+                    'Price' => $model->price
+                ];
+            })
         ];
     }
 }
