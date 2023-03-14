@@ -21,11 +21,6 @@ class Event extends Model
         return $this->belongsToMany(Room::class)->withPivot('price');;
     }
 
-    public function reserved_rooms()
-    {
-        return $this->rooms()->where('rooms.id', 1);
-    }
-
     public function cabins()
     {
         return $this->rooms()->where('type', 'cabin');
@@ -39,5 +34,26 @@ class Event extends Model
     public function vips()
     {
         return $this->rooms()->where('type', 'vip');
+    }
+
+    public function cots() {
+        return Cot::select(
+                'cots.id as id',
+                'cots.description as description',
+                'cots.room_id as room_id')
+        ->join('rooms', 'cots.room_id', '=', 'rooms.id')
+        ->join('event_room', 'rooms.id', '=', 'event_room.room_id')
+        ->join('events', 'events.id', '=', 'event_room.event_id')
+        ->where('events.id', '=', $this->id);
+    }
+
+    public function availableCots() {
+        return $this->cots()->leftJoin('reservations', 'reservations.cot_id', 'cots.id')->whereNull('reservations.id');
+        return Cot::join('rooms', 'cots.room_id', '=', 'rooms.id')
+        ->join('event_room', 'rooms.id', '=', 'event_room.room_id')
+        ->join('events', 'events.id', '=', 'event_room.event_id')
+        ->join('reservations', 'cots.id', '=', 'reservations.cot_id')
+        ->where('events.id', '=', $this->id)
+        ->whereNull('reservations.id');
     }
 }

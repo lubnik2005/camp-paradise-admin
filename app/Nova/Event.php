@@ -63,7 +63,9 @@ class Event extends Resource
                     Number::make('Price')->help('Warning: This value is in pennies/cents NOT dollars.'),
                 ];
             }),
-            HasMany::make('Reservations', 'reservations', Reservation::class)
+            HasMany::make('Reservations', 'reservations', Reservation::class),
+            HasMany::make('Cots', 'cots', Cot::class),
+            HasMany::make('Not Reserved Cots', 'availableCots', Cot::class)
         ];
     }
 
