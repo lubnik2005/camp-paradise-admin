@@ -579,7 +579,9 @@ class ApiController extends Controller
         $room = $event->rooms()->whereIn('sex', [$attendee->sex, 'c'])->findOrFail($data['room_id']);
         $price = $room->pivot->price;
         $cots = \App\Models\Cot::where('cots.room_id', '=', $room->id)
-            ->where('reservations.event_id', '=', $event->id)
+            ->whereHas('reservations.id', function ($query) use ($event) {
+                $query->where('reservations.event_id', $event->id);
+            })
             ->leftJoin('reservations', 'cots.id', '=', 'reservations.cot_id')
             // ->join('rooms', 'cots.room_id', '=', 'rooms.id')
             // ->join('event_room', 'event_room.room_id' , '=', 'rooms.id')
