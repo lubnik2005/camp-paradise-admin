@@ -283,7 +283,7 @@ class ApiController extends Controller
         $parser = new Parser(new JoseEncoder());
 
         try {
-            $token = $parser->parse($request->bearerToken());
+            $token = $parser->parse($request->only(['token'])['token']);
         } catch (CannotDecodeContent | InvalidTokenStructure | UnsupportedHeaderFound $e) {
             echo 'Oh no, an error: ' . $e->getMessage();
         }
