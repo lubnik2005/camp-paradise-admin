@@ -19,6 +19,11 @@ use Lcobucci\JWT\UnencryptedToken;
 use Illuminate\Support\Facades\Log;
 use Carbon\CarbonImmutable;
 
+/* TO THE READER OF THIS CODE
+* Look, I know this sucks. I know this should be in other files.
+* I was kinda in a rush...
+*/
+
 class ApiController extends Controller
 {
 
@@ -278,7 +283,7 @@ class ApiController extends Controller
         $parser = new Parser(new JoseEncoder());
 
         try {
-            $token = $parser->parse($request->only(['token'])['token']);
+            $token = $parser->parse($request->bearerToken());
         } catch (CannotDecodeContent | InvalidTokenStructure | UnsupportedHeaderFound $e) {
             echo 'Oh no, an error: ' . $e->getMessage();
         }
@@ -323,12 +328,12 @@ class ApiController extends Controller
 
     public function newPassword(Request $request)
     {
-        $data = $request->only('email', 'password', 'confirmPassword', 'token');
+        $data = $request->only('email', 'password', 'confirmPassword');
         $data['email'] = strtolower($data['email']);
         $parser = new Parser(new JoseEncoder());
 
         try {
-            $token = $parser->parse($data['token']);
+            $token = $parser->parse($request->bearerToken());
         } catch (CannotDecodeContent | InvalidTokenStructure | UnsupportedHeaderFound | \TypeError $e) {
             return response()->json(['error' => ['bad_token' => 'Token is invalid. Please resend the E-mail.']], 403);
         }
@@ -574,6 +579,7 @@ class ApiController extends Controller
         $room = $event->rooms()->whereIn('sex', [$attendee->sex, 'c'])->findOrFail($data['room_id']);
         $price = $room->pivot->price;
         $cots = \App\Models\Cot::where('cots.room_id', '=', $room->id)
+            ->where('reservations.event_id', '=', $event->id)
             ->leftJoin('reservations', 'cots.id', '=', 'reservations.cot_id')
             // ->join('rooms', 'cots.room_id', '=', 'rooms.id')
             // ->join('event_room', 'event_room.room_id' , '=', 'rooms.id')
@@ -631,6 +637,16 @@ class ApiController extends Controller
         }, $events->toArray());
     }
 
+    public function current_events(Request $request)
+    {
+        return \App\Models\Event::select('id', 'name', 'start_on', 'end_on')
+            ->where('end_on', '>=', Carbon::now())
+            ->where('registration_start_at', '<=', Carbon::now())
+            ->where('status', '=', 'published')
+            ->orderBy('start_on', 'desc')
+            ->get();
+    }
+
     public function previous_events(Request $request)
     {
         return \App\Models\Event::select('id', 'name', 'start_on', 'end_on')
@@ -644,8 +660,9 @@ class ApiController extends Controller
     {
         $events = \App\Models\Event::select('id', 'name', 'start_on', 'end_on')
             ->where('end_on', '>=', Carbon::now())
+            ->where('registration_start_at', '>=', Carbon::now())
             ->where('status', '=', 'published')
-            ->orderBy('start_on', 'desc')
+            ->orderBy('registration_start_at', 'desc')
             ->get();
         $reservations = \App\Models\Reservation::where('attendee_id', auth('api')->user()->id)
             ->whereIn('event_id', $events->pluck('id'))->get()->toArray();

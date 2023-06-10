@@ -58,6 +58,8 @@ class Event extends Resource
                 ->displayUsingLabels(),
             DateTime::make('Start On')->sortable()->rules('required'),
             DateTime::make('End On')->sortable()->rules('required'),
+            DateTime::make('Registration Start At')->sortable()->rules('required'),
+            DateTime::make('Registration End At')->sortable()->rules('required'),
             BelongsToMany::make('Rooms')->fields(function () {
                 return [
                     Number::make('Price')->help('Warning: This value is in pennies/cents NOT dollars.'),
