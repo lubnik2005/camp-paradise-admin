@@ -578,13 +578,13 @@ class ApiController extends Controller
         $event = \App\Models\Event::findOrFail($data['event_id']);
         $room = $event->rooms()->whereIn('sex', [$attendee->sex, 'c'])->findOrFail($data['room_id']);
         $price = $room->pivot->price;
-        $cots = \App\Models\Cot::where('cots.room_id', '=', $room->id)
-            ->leftJoin('reservations', 'cots.id', '=', 'reservations.cot_id')
+        $cots = \App\Models\Cot::leftJoin('reservations', function ($join) use ($event) {
+            $join->on('cots.id', '=', 'reservations.cot_id')
+                 ->where('reservations.event_id', '=', $event->id);
+        })
+            ->where('cots.room_id', '=', $room->id)
             ->select('cots.*', 'reservations.first_name', 'reservations.last_name')
             ->orderBy('cots.description')
-            ->when($event->id, function ($query, $eventId) {
-                $query->where('reservations.event_id', $eventId);
-            })
             ->get()->toArray();
         $cots = array_map(function ($cot) use ($price) {
             $cot['price'] = $price;
