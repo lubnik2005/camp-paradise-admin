@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Laravel\Cashier\Events\WebhookReceived;
 use Illuminate\Support\Facades\Validator;
+use Carbon\Carbon;
 
 class StripeController extends Controller
 {
@@ -60,6 +61,21 @@ class StripeController extends Controller
         );
         unset($totalPrice);
         return response()->json(['paymentInfo' => $payment, 'clientSecret' => $payment->client_secret]);
+    }
+
+    public function refund(Request $request)
+    {
+        $reservation_id = $request->only('id')['id'];
+        $user_id = auth('api')->user()->id;
+        $reservation = \App\Models\Reservation::where('attendee_id', $user_id)->where('id',$reservation_id)->whereNull('deleted_at')->first();
+        $event = \App\Models\Event::find($reservation->event_id);
+        $stripe_payment_intent = $reservation->stripe_payment_intent;
+        if (!$stripe_payment_intent) return response()->json(['error' => ['Missing Stripe ID. Please contact contact the web admin.']], 500);
+        $refund = auth('api')->user()->refund($stripe_payment_intent, ['amount' => $event->refund_percentage * $reservation->price / 100]);
+        if (!$refund) return response()->json(['error' => ['Failed to refund.']], 500);
+        $reservation->deleted_at = Carbon::now(); 
+        $reservation->save();
+        return response()->json(['refund' => $refund]);
     }
 
     public function stripeWebhook(Request $request)

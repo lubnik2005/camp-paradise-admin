@@ -56,15 +56,22 @@ class Event extends Resource
                 ->rules('required')
                 ->options(['in_progress' => 'In progress', 'published' => 'Published'])
                 ->displayUsingLabels(),
+            Number::make('Refund Percentage')->sortable()->rules('required')
+                ->help('If the paid price was $160, then \'40\' will '
+                    . 'mean that the customer gets a refund of $64. ' 
+                    . 'When the customer requests a refund, it will '
+                    . 'be calculated by taking the \'Reservation\' price '
+                    . '* \'Event\' refund percentage / 100. Here\'s where it may go wrong - '
+                    . 'the \'Reservation\' price might not actually match the value stored in '
+                    . 'stripe. So, if the \'Reservation\' price is 16000, but stripe is 10000,'
+                    . ' and refund is 40, then the customer will still recieve $64 dollar refund.'),
             DateTime::make('Start On')->sortable()->rules('required'),
             DateTime::make('End On')->sortable()->rules('required'),
             DateTime::make('Registration Start At')->sortable()->rules('required'),
             DateTime::make('Registration End At')->sortable()->rules('required'),
-            BelongsToMany::make('Rooms')->fields(function () {
-                return [
-                    Number::make('Price')->help('Warning: This value is in pennies/cents NOT dollars.'),
-                ];
-            }),
+            DateTime::make('Refunds Available Until')->sortable()->rules('required'),
+            BelongsToMany::make('Rooms')->fields(fn() => [Number::make('Price')
+                ->help('Warning: This value is in pennies/cents NOT dollars.')]),
             HasMany::make('Reservations', 'reservations', Reservation::class),
             HasMany::make('Cots', 'cots', Cot::class),
             HasMany::make('Not Reserved Cots', 'availableCots', Cot::class)

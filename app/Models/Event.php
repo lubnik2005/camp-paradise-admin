@@ -14,6 +14,7 @@ class Event extends Model
         'end_on' => 'datetime',
         'registration_start_at' => 'datetime',
         'registration_end_at' => 'datetime',
+        'refunds_available_until' => 'datetime',
     ];
 
     public function reservations()

@@ -166,7 +166,10 @@ class ApiController extends Controller
                     return response()->json(['error' => ['cot_id' => 'Reservation failed. Cot already taken.']], 403);
                 }
 
-                $events = \App\Models\Event::where('events.id', '=', $event_id)->where('status', '=', 'published');
+                $events = \App\Models\Event::where('events.id', '=', $event_id)
+                    ->where('status', '=', 'published')
+                    ->where('registration_end_at', '>=', Carbon::now())
+                    ->where('registration_start_at', '<=', Carbon::now());
                 if (!$events->exists()) {
                     Log::error("Event is not published: $event_id | Attendee: $attendee_id");
                     return response()->json(['error' => ['cot_id' => 'Event not available']], 400);
@@ -318,22 +321,23 @@ class ApiController extends Controller
             'email' => 'required|email',
         ]);
         $data['email'] = strtolower($data['email']);
-        $attendee = Attendee::where('email', $data['email'])->firstOrFail();
-
-        Mail::mailer('ses')
-            ->to($attendee)
-            ->send(new ResetPasswordEmail($attendee));
+        $attendee = Attendee::where('email', $data['email'])->first();
+        if ($attendee){
+            Mail::mailer('ses')
+                ->to($attendee)
+                ->send(new ResetPasswordEmail($attendee));
+        }
         return response()->json(['success' => ['Password reset e-mail sent.']], 200);
     }
 
     public function newPassword(Request $request)
     {
-        $data = $request->only('email', 'password', 'confirmPassword');
+        $data = $request->only('email', 'password', 'confirmPassword', 'token');
         $data['email'] = strtolower($data['email']);
         $parser = new Parser(new JoseEncoder());
 
         try {
-            $token = $parser->parse($request->bearerToken());
+            $token = $parser->parse($data['token']);
         } catch (CannotDecodeContent | InvalidTokenStructure | UnsupportedHeaderFound | \TypeError $e) {
             return response()->json(['error' => ['bad_token' => 'Token is invalid. Please resend the E-mail.']], 403);
         }
@@ -580,7 +584,8 @@ class ApiController extends Controller
         $price = $room->pivot->price;
         $cots = \App\Models\Cot::leftJoin('reservations', function ($join) use ($event) {
             $join->on('cots.id', '=', 'reservations.cot_id')
-                 ->where('reservations.event_id', '=', $event->id);
+                 ->where('reservations.event_id', '=', $event->id)
+                 ->whereNull('reservations.deleted_at');
         })
             ->where('cots.room_id', '=', $room->id)
             ->select('cots.*', 'reservations.first_name', 'reservations.last_name')
@@ -602,19 +607,9 @@ class ApiController extends Controller
     public function reservations(Request $request)
     {
         $attendee = auth('api')->user();
-        $reservations = \App\Models\Reservation::with('room:id,name', 'cot:id,description', 'event:id,name')
-            //->select('first_name', 'last_name', 'price', 'created_at', 'room.id', 'room.name')
-
-            // ->select(
-            //     'reservations.first_name',
-            //     'reservations.last_name',
-            //     'reservations.price',
-            //     'room.name',
-            //     'event.name',
-            //     'cot.description'
-            // )
+        $reservations = \App\Models\Reservation::with('room:id,name', 'cot:id,description', 'event:id,name,refund_percentage')
             ->where('attendee_id', '=', $attendee->id)
-            ->get();
+            ->get()->each(fn(\App\Models\Reservation $reservation) => $reservation->refund = $reservation->event->refund_percentage * $reservation->price / 100);
         return response()->json($reservations, 200);
     }
 
@@ -638,8 +633,8 @@ class ApiController extends Controller
 
     public function current_events(Request $request)
     {
-        return \App\Models\Event::select('id', 'name', 'start_on', 'end_on')
-            ->where('end_on', '>=', Carbon::now())
+        return \App\Models\Event::select('id', 'name', 'start_on', 'end_on', 'registration_end_at', 'registration_start_at')
+            ->where('registration_end_at', '>=', Carbon::now())
             ->where('registration_start_at', '<=', Carbon::now())
             ->where('status', '=', 'published')
             ->orderBy('start_on', 'desc')
