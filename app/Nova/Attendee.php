@@ -36,7 +36,7 @@ class Attendee extends Resource
      * @var array
      */
     public static $search = [
-        'email',
+        'email', 'first_name', 'last_name'
     ];
 
     /**
