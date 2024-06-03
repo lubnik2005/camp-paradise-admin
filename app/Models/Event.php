@@ -93,12 +93,12 @@ class Event extends Model
 
     public function availableCots()
     {
-        return $this->cots()->leftJoin('reservations', 'reservations.cot_id', 'cots.id')->whereNull('reservations.id');
-        return Cot::join('rooms', 'cots.room_id', '=', 'rooms.id')
-            ->join('event_room', 'rooms.id', '=', 'event_room.room_id')
-            ->join('events', 'events.id', '=', 'event_room.event_id')
-            ->join('reservations', 'cots.id', '=', 'reservations.cot_id')
-            ->where('events.id', '=', $this->id)
-            ->whereNull('reservations.id');
+        // Distinct is needed  because a cot may have had the same reservation canceled twice
+        return $this->cots()->leftJoin('reservations', function($join){
+            $join->on("cots.id", "reservations.cot_id")->on("reservations.event_id", "events.id");
+        })->where(function ($query) {
+            return $query->whereNull('reservations.id')->orWhereNotNull('reservations.deleted_at');
+        })
+            ->distinct('cots.id');
     }
 }
