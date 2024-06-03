@@ -131,6 +131,7 @@ class Event extends Resource
     {
         return [
             ExportAsCsv::make()->nameable(),
+            \App\Nova\Actions\ImportRooms::make(),
         ];
     }
 }
