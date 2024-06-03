@@ -58,6 +58,10 @@ class Attendee extends Resource
             DateTime::make('Email Verified At')->sortable(),
             DateTime::make('Updated At')->sortable(),
             DateTime::make('Created At')->sortable(),
+            Text::make('Minor', function() {
+                $formAnswers = $this->formAnswers();
+                return $formAnswers->exists() ? $formAnswers->orderByDesc('created_at')->first()->answers['isMinor'] : 'n/a';
+            }),
             Select::make('Sex')->sortable()->options(['m' => 'Male', 'f' => 'Female'])->rules('required'),
             Password::make('Password')->onlyOnForms(),
             HasMany::make('Reservations', 'reservations', Reservation::class),
