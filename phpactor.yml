@@ -1,0 +1,11 @@
+parameters:
+    extension_manager.extension_vendor_dir: '%application_root%/vendor'
+    navigator.destinations.source: "src"
+    navigator.destinations.test: "tests"
+    code_transform.class_new.variants: []
+    code_transform.template_paths: []
+    php.version: 7.4
+
+    # Symfony specific configurations
+    framework.autoloader_path: 'vendor/autoload.php'
+
