@@ -86,7 +86,9 @@ class Cot extends Resource
      */
     public function filters(NovaRequest $request)
     {
-        return [];
+        return [
+            \App\Nova\Filters\RoomType::make()
+        ];
     }
 
     /**
