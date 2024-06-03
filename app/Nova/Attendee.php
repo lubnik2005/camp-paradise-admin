@@ -61,7 +61,7 @@ class Attendee extends Resource
             Select::make('Sex')->sortable()->options(['m' => 'Male', 'f' => 'Female'])->rules('required'),
             Password::make('Password')->onlyOnForms(),
             HasMany::make('Reservations', 'reservations', Reservation::class),
-            HasMany::make('Forms', 'forms', FormAnswer::class),
+            HasMany::make('Forms', 'formAnswers', FormAnswer::class),
         ];
     }
 
